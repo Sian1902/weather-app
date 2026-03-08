@@ -27,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 
-// ─── Palette ────────────────────────────────────────────────────────────────────
 private val CardBg       = Color(0xFF1E3A5F).copy(alpha = 0.65f)
 private val CardBgDark   = Color(0xFF152D4A).copy(alpha = 0.70f)
 private val White        = Color.White
@@ -41,11 +40,9 @@ private val UvRed        = Color(0xFFF44336)
 private val UvPurple     = Color(0xFF9C27B0)
 private val DividerColor = Color.White.copy(alpha = 0.15f)
 
-// ─── Preview / fake data models ─────────────────────────────────────────────────
 data class HourlyItem(val label: String, val iconRes: Int, val temp: String)
 data class DailyItem(val day: String, val date: String, val iconRes: Int, val high: String, val low: String)
 
-// ─── Main composable ─────────────────────────────────────────────────────────────
 @Composable
 fun HomeScreen(
     cityName: String = "Cairo",
@@ -60,7 +57,7 @@ fun HomeScreen(
     uvLabel: String = "Minimal",
     uvDescription: String = "Almost no risk of sunburn",
     windSpeedBft: Int = 2,
-    windDeg: Int = 315,          // NW = 315°
+    windDeg: Int = 315,
     windDescription: String = "NW wind, gentle breeze on the face",
     humidity: Int = 76,
     humidityDescription: String = "Fairly humid, dew is likely to form",
@@ -89,7 +86,7 @@ fun HomeScreen(
                 )
             )
     ) {
-        // Cloudy sky atmospheric layer
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,7 +108,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // ── Top bar ──────────────────────────────────────────────────────────
+
             TopBar(
                 cityName = cityName,
                 subtitle = null,
@@ -119,7 +116,6 @@ fun HomeScreen(
                 onMoreClick = onMoreClick
             )
 
-            // ── Big temperature hero ─────────────────────────────────────────────
             HeroSection(
                 currentTemp = currentTemp,
                 highTemp = highTemp,
@@ -128,29 +124,17 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ── Hourly card ──────────────────────────────────────────────────────
             HourlyWeatherCard(items = hourlyItems)
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ── 5-day forecast card ──────────────────────────────────────────────
             ForecastCard(items = dailyItems)
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ── Detail cards grid (second screen) ────────────────────────────────
-            // Top bar for detail screen
-            DetailTopBar(
-                cityName = cityName,
-                temp = currentTemp,
-                description = weatherDescription,
-                onMenuClick = onMenuClick,
-                onMoreClick = onMoreClick
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 2-column grid of detail cards
             Column(
                 modifier = Modifier.padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -200,7 +184,6 @@ fun HomeScreen(
                         description = pressureDescription,
                         modifier = Modifier.weight(1f)
                     )
-                    // Moon phase card placeholder
                     MoonPhaseCard(
                         phase = "Waning gibbous",
                         modifier = Modifier.weight(1f)
@@ -213,7 +196,6 @@ fun HomeScreen(
     }
 }
 
-// ─── Top bar (screen 1) ──────────────────────────────────────────────────────────
 @Composable
 fun TopBar(
     cityName: String,
@@ -228,7 +210,6 @@ fun TopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Menu button
         IconButton(
             onClick = onMenuClick,
             modifier = Modifier
@@ -244,7 +225,6 @@ fun TopBar(
             )
         }
 
-        // City name + location indicator
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = cityName,
@@ -265,7 +245,6 @@ fun TopBar(
                         tint = WhiteDim,
                         modifier = Modifier.size(14.dp)
                     )
-                    // Page indicator dots
                     repeat(2) { i ->
                         Box(
                             modifier = Modifier
@@ -278,7 +257,6 @@ fun TopBar(
             }
         }
 
-        // More button
         IconButton(
             onClick = onMoreClick,
             modifier = Modifier
@@ -295,68 +273,6 @@ fun TopBar(
     }
 }
 
-// ─── Detail screen top bar (screen 2) ────────────────────────────────────────────
-@Composable
-fun DetailTopBar(
-    cityName: String,
-    temp: String,
-    description: String,
-    onMenuClick: () -> Unit,
-    onMoreClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(
-            onClick = onMenuClick,
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.2f))
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_menu_add),
-                contentDescription = "Menu",
-                tint = White,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = cityName,
-                color = White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = "$temp° | $description",
-                color = WhiteDim,
-                fontSize = 14.sp
-            )
-        }
-
-        IconButton(
-            onClick = onMoreClick,
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.2f))
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More",
-                tint = White
-            )
-        }
-    }
-}
-
-// ─── Hero temperature section ────────────────────────────────────────────────────
 @Composable
 fun HeroSection(currentTemp: String, highTemp: String, lowTemp: String) {
     Column(
@@ -380,7 +296,6 @@ fun HeroSection(currentTemp: String, highTemp: String, lowTemp: String) {
     }
 }
 
-// ─── Hourly weather card ─────────────────────────────────────────────────────────
 @Composable
 fun HourlyWeatherCard(items: List<HourlyItem>) {
     GlassCard(modifier = Modifier
@@ -435,7 +350,6 @@ fun HourlyItemView(item: HourlyItem) {
     }
 }
 
-// ─── 5-day forecast card ─────────────────────────────────────────────────────────
 @Composable
 fun ForecastCard(items: List<DailyItem>) {
     GlassCard(modifier = Modifier
@@ -477,7 +391,6 @@ fun ForecastCard(items: List<DailyItem>) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Day columns
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -487,14 +400,12 @@ fun ForecastCard(items: List<DailyItem>) {
                 }
             }
 
-            // High temp sparkline
             Spacer(modifier = Modifier.height(8.dp))
             SparkLine(
                 values = items.map { it.high.removeSuffix("°").toFloat() },
                 color = GoldLine
             )
 
-            // Low temp sparkline
             Spacer(modifier = Modifier.height(4.dp))
             SparkLine(
                 values = items.map { it.low.removeSuffix("°").toFloat() },
@@ -503,7 +414,6 @@ fun ForecastCard(items: List<DailyItem>) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Low temp row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -521,7 +431,6 @@ fun ForecastCard(items: List<DailyItem>) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Extended forecast button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -561,7 +470,6 @@ fun DailyItemView(item: DailyItem, modifier: Modifier = Modifier) {
     }
 }
 
-// ─── Sparkline ───────────────────────────────────────────────────────────────────
 @Composable
 fun SparkLine(values: List<Float>, color: Color) {
     if (values.size < 2) return
@@ -593,7 +501,6 @@ fun SparkLine(values: List<Float>, color: Color) {
             )
         }
 
-        // Dots
         pts.forEach { pt ->
             drawCircle(color = color, radius = 4.dp.toPx(), center = pt)
             drawCircle(
@@ -605,7 +512,6 @@ fun SparkLine(values: List<Float>, color: Color) {
     }
 }
 
-// ─── Detail cards ─────────────────────────────────────────────────────────────────
 
 @Composable
 fun UvIndexCard(uvIndex: Int, label: String, description: String, modifier: Modifier = Modifier) {
@@ -635,7 +541,6 @@ fun UvBar(uvIndex: Int) {
                 )
             )
     ) {
-        // Indicator dot
         val fraction = (uvIndex.coerceIn(0, 11) / 11f)
         Box(
             modifier = Modifier
@@ -685,7 +590,6 @@ fun WindCompass(speedBft: Int, deg: Int, modifier: Modifier = Modifier) {
         val cy = size.height / 2f
         val r  = size.minDimension / 2f
 
-        // Outer tick ring
         for (i in 0 until 72) {
             val angle = Math.toRadians(i * 5.0)
             val tickLen = if (i % 9 == 0) 10.dp.toPx() else 5.dp.toPx()
@@ -699,11 +603,9 @@ fun WindCompass(speedBft: Int, deg: Int, modifier: Modifier = Modifier) {
             )
         }
 
-        // Center circle
         drawCircle(color = Color(0xFF1E3A5F).copy(alpha = 0.6f), radius = r * 0.55f, center = Offset(cx, cy))
         drawCircle(color = Color.White.copy(alpha = 0.2f), radius = r * 0.55f, center = Offset(cx, cy), style = Stroke(1.dp.toPx()))
 
-        // Arrow — rotated to wind direction
         val arrowAngle = Math.toRadians(deg.toDouble() - 90)
         val arrowLen = r * 0.45f
         val arrowEnd = Offset(
@@ -717,7 +619,6 @@ fun WindCompass(speedBft: Int, deg: Int, modifier: Modifier = Modifier) {
             strokeWidth = 2.5.dp.toPx(),
             cap = StrokeCap.Round
         )
-        // Arrowhead
         val headAngle1 = arrowAngle + Math.toRadians(150.0)
         val headAngle2 = arrowAngle - Math.toRadians(150.0)
         val headLen = 12.dp.toPx()
@@ -728,10 +629,8 @@ fun WindCompass(speedBft: Int, deg: Int, modifier: Modifier = Modifier) {
             end = Offset(arrowEnd.x + headLen * Math.cos(headAngle2).toFloat(), arrowEnd.y + headLen * Math.sin(headAngle2).toFloat()),
             strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
 
-        // White dot at centre
         drawCircle(color = Color.White, radius = 5.dp.toPx(), center = Offset(cx, cy))
     }
-    // Bft label overlay — drawn via Box
     Box(contentAlignment = Alignment.Center, modifier = modifier) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "$speedBft", color = White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -763,7 +662,6 @@ fun SunArc(modifier: Modifier = Modifier) {
             cubicTo(w * 0.25f, 0f, w * 0.75f, 0f, w, h)
         }
         drawPath(path, color = Color.White.copy(alpha = 0.3f), style = Stroke(1.5.dp.toPx()))
-        // Sun dot at ~60% through arc
         val t = 0.6f
         val sunX = w * t
         val sunY = 4 * h * t * (1 - t) * (-1f) + h  // rough bezier approx
@@ -793,7 +691,6 @@ fun VisibilityCard(visibilityKm: Int, description: String, modifier: Modifier = 
             Text(text = "km", color = WhiteDim, fontSize = 14.sp, modifier = Modifier.padding(bottom = 6.dp))
         }
         Spacer(modifier = Modifier.height(8.dp))
-        // Visibility slider
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -857,7 +754,6 @@ fun PressureGauge(pressure: Int, modifier: Modifier = Modifier) {
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            // Needle — map 950-1050 hPa to -120°..+120°
             val normalized = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
             val needleAngle = Math.toRadians((-120 + normalized * 240).toDouble())
             val needleLen = r * 0.7f
@@ -883,13 +779,11 @@ fun MoonPhaseCard(phase: String, modifier: Modifier = Modifier) {
     DetailCard(modifier = modifier, minHeight = 160.dp) {
         CardHeader(iconRes = R.drawable.ic_moon, title = "Moon phase")
         Spacer(modifier = Modifier.height(8.dp))
-        // Moon illustration placeholder using Canvas
         Canvas(modifier = Modifier.size(80.dp).align(Alignment.CenterHorizontally)) {
             val cx = size.width / 2f
             val cy = size.height / 2f
             val r  = size.minDimension / 2f
             drawCircle(color = Color(0xFFCCCCCC), radius = r, center = Offset(cx, cy))
-            // Shadow for waning gibbous
             drawCircle(
                 color = Color(0xFF1E3A5F).copy(alpha = 0.7f),
                 radius = r,
@@ -901,7 +795,6 @@ fun MoonPhaseCard(phase: String, modifier: Modifier = Modifier) {
     }
 }
 
-// ─── Shared components ────────────────────────────────────────────────────────────
 
 @Composable
 fun GlassCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
@@ -944,7 +837,6 @@ fun CardHeader(iconRes: Int, title: String) {
     }
 }
 
-// ─── Sample data ──────────────────────────────────────────────────────────────────
 
 fun sampleHourly() = listOf(
     HourlyItem("Now",   R.drawable.ic_weather_partly_cloudy, "14°"),
@@ -964,7 +856,6 @@ fun sampleDaily() = listOf(
     DailyItem("Wed",   "3/11", R.drawable.ic_weather_partly_cloudy, "24°", "13°"),
 )
 
-// ─── Preview ──────────────────────────────────────────────────────────────────────
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable
 fun HomeScreenPreview() {
