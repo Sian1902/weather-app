@@ -15,31 +15,31 @@ import com.example.weather.ui.theme.WeatherColors
 
 @Composable
 fun HomeScreen(
-    cityName: String = "Cairo",
-    currentTemp: String = "14",
-    highTemp: String = "23",
-    lowTemp: String = "13",
-    weatherDescription: String = "Cloudy",
-    feelsLike: String = "13",
-    actualTemp: String = "14",
-    feelsLikeDescription: String = "Feels similar to actual temperature",
-    uvIndex: Int = 1,
-    uvLabel: String = "Minimal",
-    uvDescription: String = "Almost no risk of sunburn",
-    windSpeedBft: Int = 2,
-    windDeg: Int = 315,
-    windDescription: String = "NW wind, gentle breeze on the face",
-    humidity: Int = 76,
-    humidityDescription: String = "Fairly humid, dew is likely to form",
-    visibilityKm: Int = 30,
-    visibilityDescription: String = "Excellent visibility",
-    pressure: Int = 1021,
-    pressureDescription: String = "Slightly high pressure",
-    sunriseTime: String = "6:14",
-    sunsetTime: String = "17:58",
-    moonPhase: String = "Waning gibbous",
-    hourlyItems: List<HourlyItem> = sampleHourly(),
-    dailyItems: List<DailyItem> = sampleDaily(),
+    cityName: String ,
+    currentTemp: String,
+    highTemp: String ,
+    lowTemp: String ,
+    weatherDescription: String ,
+    feelsLike: String ,
+    actualTemp: String ,
+    feelsLikeDescription: String ,
+    uvIndex: Int ,
+    uvLabel: String ,
+    uvDescription: String ,
+    windSpeedBft: Int ,
+    windDeg: Int ,
+    windDescription: String ,
+    humidity: Int ,
+    humidityDescription: String ,
+    visibilityKm: Int ,
+    visibilityDescription: String ,
+    pressure: Int ,
+    pressureDescription: String ,
+    sunriseTime: String ,
+    sunsetTime: String ,
+    moonPhase: String ,
+    hourlyItems: List<HourlyItem> ,
+    dailyItems: List<DailyItem> ,
     onMenuClick: () -> Unit = {},
     onMoreClick: () -> Unit = {},
     onExtendedForecastClick: () -> Unit = {}
@@ -166,8 +166,3 @@ fun HomeScreen(
     }
 }
 
-@Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen()
-}
