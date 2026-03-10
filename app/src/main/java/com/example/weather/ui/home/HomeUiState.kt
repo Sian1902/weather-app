@@ -1,8 +1,5 @@
 package com.example.weather.ui.home
 
-import com.example.weather.ui.home.HourlyItem
-import com.example.weather.ui.home.DailyItem
-
 sealed class HomeUiState {
     object Loading : HomeUiState()
 
@@ -40,7 +37,10 @@ sealed class HomeUiState {
         val moonPhase: String,
 
         val hourlyItems: List<HourlyItem>,
-        val dailyItems: List<DailyItem>
+        val dailyItems: List<DailyItem>,
+
+        val isFromCache: Boolean = false,
+        val cachedAtEpochMs: Long = 0L
     ) : HomeUiState()
 
     data class Error(val message: String) : HomeUiState()
