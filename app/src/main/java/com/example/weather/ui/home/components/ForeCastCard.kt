@@ -24,7 +24,6 @@ import com.example.weather.ui.theme.WeatherColors
 @Composable
 fun ForecastCard(
     items: List<DailyItem>,
-    onExtendedForecastClick: () -> Unit = {}
 ) {
     GlassCard(
         modifier = Modifier
@@ -109,21 +108,7 @@ fun ForecastCard(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(WeatherColors.TextPrimary.copy(alpha = 0.15f))
-                    .clickable { onExtendedForecastClick() }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text     = "Extended forecast",
-                    color    = WeatherColors.TextPrimary,
-                    fontSize = 14.sp
-                )
-            }
+
         }
     }
 }

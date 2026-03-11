@@ -5,6 +5,7 @@ sealed class HomeUiState {
 
     data class Success(
         val cityName: String,
+        val countryCode: String,          // e.g. "EG", "US"
         val currentTemp: String,
         val highTemp: String,
         val lowTemp: String,

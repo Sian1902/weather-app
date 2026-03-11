@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.sp
 import com.example.weather.R
 import com.example.weather.ui.theme.WeatherColors
 
-
 @Composable
 fun TopBar(
     cityName: String,
+    countryCode: String,
     onMenuClick: () -> Unit,
     onMoreClick: () -> Unit
 ) {
@@ -50,34 +50,30 @@ fun TopBar(
         }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // City name
             Text(
-                text = cityName,
-                color = WeatherColors.TextPrimary,
-                fontSize = 20.sp,
+                text       = cityName,
+                color      = WeatherColors.TextPrimary,
+                fontSize   = 20.sp,
                 fontWeight = FontWeight.Medium
             )
+            // Country code beneath city name
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment     = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.LocationOn,
+                    imageVector   = Icons.Default.LocationOn,
                     contentDescription = null,
-                    tint = WeatherColors.TextSecondary,
-                    modifier = Modifier.size(14.dp)
+                    tint          = WeatherColors.TextSecondary,
+                    modifier      = Modifier.size(12.dp)
                 )
-                // Page indicator dots
-                repeat(2) { i ->
-                    Box(
-                        modifier = Modifier
-                            .size(if (i == 0) 7.dp else 5.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (i == 0) WeatherColors.TextPrimary
-                                else WeatherColors.TextSecondary
-                            )
-                    )
-                }
+                Text(
+                    text     = countryCode,
+                    color    = WeatherColors.TextSecondary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Normal
+                )
             }
         }
 
@@ -89,11 +85,10 @@ fun TopBar(
                 .background(WeatherColors.TextPrimary.copy(alpha = 0.2f))
         ) {
             Icon(
-                imageVector = Icons.Default.MoreVert,
+                imageVector   = Icons.Default.MoreVert,
                 contentDescription = "More",
-                tint = WeatherColors.TextPrimary
+                tint          = WeatherColors.TextPrimary
             )
         }
     }
 }
-

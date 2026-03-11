@@ -26,6 +26,7 @@ import java.util.*
 @Composable
 fun HomeScreen(
     cityName: String,
+    countryCode: String,
     currentTemp: String,
     highTemp: String,
     lowTemp: String,
@@ -92,6 +93,7 @@ fun HomeScreen(
         ) {
             TopBar(
                 cityName    = cityName,
+                countryCode = countryCode,      // ← new
                 onMenuClick = onMenuClick,
                 onMoreClick = onMoreClick
             )
@@ -113,8 +115,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             ForecastCard(
-                items                   = dailyItems,
-                onExtendedForecastClick = onExtendedForecastClick
+                items                   = dailyItems
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -124,54 +125,20 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    UvIndexCard(
-                        uvIndex     = uvIndex,
-                        label       = uvLabel,
-                        description = uvDescription,
-                        modifier    = Modifier.weight(1f)
-                    )
-                    FeelsLikeCard(
-                        feelsLike   = feelsLike,
-                        actualTemp  = actualTemp,
-                        description = feelsLikeDescription,
-                        modifier    = Modifier.weight(1f)
-                    )
+                    UvIndexCard(uvIndex = uvIndex, label = uvLabel, description = uvDescription, modifier = Modifier.weight(1f))
+                    FeelsLikeCard(feelsLike = feelsLike, actualTemp = actualTemp, description = feelsLikeDescription, modifier = Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    WindCard(
-                        speedBft    = windSpeedBft,
-                        deg         = windDeg,
-                        description = windDescription,
-                        modifier    = Modifier.weight(1f)
-                    )
-                    SunCard(
-                        sunriseTime = sunriseTime,
-                        sunsetTime  = sunsetTime,
-                        modifier    = Modifier.weight(1f)
-                    )
+                    WindCard(speedBft = windSpeedBft, deg = windDeg, description = windDescription, modifier = Modifier.weight(1f))
+                    SunCard(sunriseTime = sunriseTime, sunsetTime = sunsetTime, modifier = Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HumidityCard(
-                        humidity    = humidity,
-                        description = humidityDescription,
-                        modifier    = Modifier.weight(1f)
-                    )
-                    VisibilityCard(
-                        visibilityKm = visibilityKm,
-                        description  = visibilityDescription,
-                        modifier     = Modifier.weight(1f)
-                    )
+                    HumidityCard(humidity = humidity, description = humidityDescription, modifier = Modifier.weight(1f))
+                    VisibilityCard(visibilityKm = visibilityKm, description = visibilityDescription, modifier = Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PressureCard(
-                        pressure    = pressure,
-                        description = pressureDescription,
-                        modifier    = Modifier.weight(1f)
-                    )
-                    MoonPhaseCard(
-                        phase    = moonPhase,
-                        modifier = Modifier.weight(1f)
-                    )
+                    PressureCard(pressure = pressure, description = pressureDescription, modifier = Modifier.weight(1f))
+                    MoonPhaseCard(phase = moonPhase, modifier = Modifier.weight(1f))
                 }
             }
 
@@ -186,7 +153,6 @@ private fun CacheBanner(cachedAtEpochMs: Long) {
         if (cachedAtEpochMs == 0L) "recently"
         else SimpleDateFormat("HH:mm, MMM d", Locale.getDefault()).format(Date(cachedAtEpochMs))
     }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
