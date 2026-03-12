@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,7 +36,7 @@ fun HourlyWeatherCard(items: List<HourlyItem>) {
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Hourly weather",
+                    text = stringResource(R.string.hourly_weather),
                     color = WeatherColors.TextSecondary,
                     fontSize = 13.sp
                 )
@@ -56,15 +57,19 @@ fun HourlyWeatherCard(items: List<HourlyItem>) {
 
 @Composable
 private fun HourlyItemView(item: HourlyItem) {
+    // "NOW" is a sentinel set by WeatherMapper; resolve it to the locale string here
+    val label = if (item.label == "NOW") stringResource(R.string.label_now) else item.label
+    val isNow = item.label == "NOW"
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = item.label,
-            color = if (item.label == "Now") WeatherColors.TextPrimary else WeatherColors.TextSecondary,
+            text = label,
+            color = if (isNow) WeatherColors.TextPrimary else WeatherColors.TextSecondary,
             fontSize = 13.sp,
-            fontWeight = if (item.label == "Now") FontWeight.Bold else FontWeight.Normal
+            fontWeight = if (isNow) FontWeight.Bold else FontWeight.Normal
         )
         AsyncImage(
             model = "https://openweathermap.org/img/wn/${item.iconCode}@2x.png",

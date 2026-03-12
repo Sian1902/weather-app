@@ -4,45 +4,68 @@ sealed class HomeUiState {
     object Loading : HomeUiState()
 
     data class Success(
-        val cityName: String,
-        val countryCode: String,          // e.g. "EG", "US"
-        val currentTemp: String,
-        val highTemp: String,
-        val lowTemp: String,
-        val weatherDescription: String,
+        // ── Location ───────────────────────────────────────────
+        val cityName           : String,
+        val countryCode        : String,
 
-        val feelsLike: String,
-        val actualTemp: String,
-        val feelsLikeDescription: String,
+        // ── Temperature display ────────────────────────────────
+        val currentTemp        : String,   // rounded, no unit symbol
+        val unitSymbol         : String,   // "°C" or "°F"
+        val highTemp           : String,
+        val lowTemp            : String,
 
-        val uvIndex: Int,
-        val uvLabel: String,
-        val uvDescription: String,
+        // ── Hero subtitle — comes from the API in the requested language ──
+        val weatherDescription : String,
 
-        val windSpeedBft: Int,
-        val windDeg: Int,
-        val windDescription: String,
+        // ── Feels-like card ────────────────────────────────────
+        val feelsLike          : String,   // rounded display string
+        val actualTemp         : String,   // same as currentTemp, for display
+        val feelsLikeRaw       : Double,   // raw value — card uses this for label lookup
+        val actualTempRaw      : Double,   // raw value — card uses this for comparison
 
-        val humidity: Int,
-        val humidityDescription: String,
+        // ── UV index card — card resolves label + description via stringResource()
+        val uvIndex            : Int,
 
-        val visibilityKm: Int,
-        val visibilityDescription: String,
+        // ── Wind card — card resolves Beaufort + cardinal via stringResource()
+        val windSpeedBft       : Int,
+        val windDeg            : Int,
 
-        val pressure: Int,
-        val pressureDescription: String,
+        // ── Humidity card — card resolves description via stringResource()
+        val humidity           : Int,
 
-        val sunriseTime: String,
-        val sunsetTime: String,
+        // ── Visibility card — card resolves description via stringResource()
+        val visibilityKm       : Int,
 
-        val moonPhase: String,
+        // ── Pressure card — card resolves description via stringResource()
+        val pressure           : Int,
 
-        val hourlyItems: List<HourlyItem>,
-        val dailyItems: List<DailyItem>,
+        // ── Sun card ───────────────────────────────────────────
+        val sunriseTime        : String,
+        val sunsetTime         : String,
 
-        val isFromCache: Boolean = false,
-        val cachedAtEpochMs: Long = 0L
+        // ── Moon phase card — card resolves label via stringResource()
+        val moonPhaseRaw       : Double,   // 0.0 – 1.0
+
+        val hourlyItems        : List<HourlyItem>,
+        val dailyItems         : List<DailyItem>,
+
+        val isFromCache        : Boolean = false,
+        val cachedAtEpochMs    : Long    = 0L
     ) : HomeUiState()
 
     data class Error(val message: String) : HomeUiState()
 }
+
+data class HourlyItem(
+    val label    : String,   // "NOW" sentinel or "HH:MM"
+    val iconCode : String,
+    val temp     : String
+)
+
+data class DailyItem(
+    val day      : String,   // "TODAY" sentinel or short day name e.g. "Mon"
+    val date     : String,   // e.g. "3/8"
+    val iconCode : String,
+    val high     : String,
+    val low      : String
+)

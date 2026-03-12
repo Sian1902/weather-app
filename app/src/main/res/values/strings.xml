@@ -1,3 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">weather</string>
+    <string name="app_name">Weather</string>
+
+    <!-- ── TopBar ─────────────────────────────────────────────── -->
+    <string name="menu_switch_to_fahrenheit">Switch to °F</string>
+    <string name="menu_switch_to_celsius">Switch to °C</string>
+    <string name="menu_settings">Settings</string>
+
+    <!-- ── HourlyWeatherCard ──────────────────────────────────── -->
+    <string name="hourly_weather">Hourly weather</string>
+    <string name="label_now">Now</string>
+
+    <!-- ── ForecastCard ───────────────────────────────────────── -->
+    <string name="weather_forecast">Weather forecast</string>
+    <string name="extended_forecast">Extended forecast</string>
+    <string name="day_today">Today</string>
+
+    <!-- ── Detail card titles ─────────────────────────────────── -->
+    <string name="card_uv_index">UV index</string>
+    <string name="card_feels_like">Feels like</string>
+    <string name="card_wind_force">Wind force</string>
+    <string name="card_sunset">Sunset</string>
+    <string name="card_humidity">Humidity</string>
+    <string name="card_visibility">Visibility</string>
+    <string name="card_pressure">Pressure</string>
+    <string name="card_moon_phase">Moon phase</string>
+
+    <!-- ── FeelsLikeCard ──────────────────────────────────────── -->
+    <string name="actual_temperature">Actual temperature: %1$s°</string>
+    <string name="feels_warmer">Feels warmer than actual temperature</string>
+    <string name="feels_colder">Feels colder than actual temperature</string>
+    <string name="feels_similar">Feels similar to actual temperature</string>
+
+    <!-- ── VisibilityCard ─────────────────────────────────────── -->
+    <string name="visibility_low">Low</string>
+    <string name="visibility_high">High</string>
+    <string name="visibility_unit">km</string>
+    <string name="visibility_excellent">Excellent visibility</string>
+    <string name="visibility_good">Good visibility</string>
+    <string name="visibility_moderate">Moderate visibility</string>
+    <string name="visibility_poor">Poor visibility</string>
+    <string name="visibility_very_poor">Very poor visibility</string>
+
+    <!-- ── WindCard ───────────────────────────────────────────── -->
+    <string name="wind_unit">Bft</string>
+    <!-- %1$s = cardinal direction (N, NW, …)  %2$s = Beaufort description -->
+    <string name="wind_description">%1$s wind, %2$s</string>
+
+    <!-- Beaufort scale descriptions -->
+    <string name="bft_0">Calm</string>
+    <string name="bft_1">Light air</string>
+    <string name="bft_2">Light breeze</string>
+    <string name="bft_3">Gentle breeze</string>
+    <string name="bft_4">Moderate breeze</string>
+    <string name="bft_5">Fresh breeze</string>
+    <string name="bft_6">Strong breeze</string>
+    <string name="bft_7">Near gale</string>
+    <string name="bft_8">Gale</string>
+    <string name="bft_9">Strong gale</string>
+    <string name="bft_10">Storm</string>
+    <string name="bft_11">Violent storm</string>
+    <string name="bft_12">Hurricane</string>
+
+    <!-- ── PressureCard ───────────────────────────────────────── -->
+    <string name="pressure_unit">hPa</string>
+    <string name="pressure_very_low">Very low pressure, stormy</string>
+    <string name="pressure_low">Low pressure</string>
+    <string name="pressure_slightly_low">Slightly low pressure</string>
+    <string name="pressure_normal">Normal pressure</string>
+    <string name="pressure_slightly_high">Slightly high pressure</string>
+    <string name="pressure_high">High pressure, stable</string>
+
+    <!-- ── HumidityCard ───────────────────────────────────────── -->
+    <string name="humidity_very_dry">Very dry air</string>
+    <string name="humidity_comfortable">Comfortable humidity</string>
+    <string name="humidity_slightly">Slightly humid</string>
+    <string name="humidity_fairly">Fairly humid, dew likely</string>
+    <string name="humidity_high">High humidity</string>
+    <string name="humidity_very_high">Very high humidity</string>
+
+    <!-- ── SunCard ────────────────────────────────────────────── -->
+    <string name="sunrise_label">Sunrise: %1$s</string>
+
+    <!-- ── UvIndexCard ────────────────────────────────────────── -->
+    <string name="uv_minimal">Minimal</string>
+    <string name="uv_moderate">Moderate</string>
+    <string name="uv_high">High</string>
+    <string name="uv_very_high">Very High</string>
+    <string name="uv_extreme">Extreme</string>
+    <string name="uv_desc_minimal">Almost no risk of sunburn</string>
+    <string name="uv_desc_moderate">Some risk, wear sunscreen</string>
+    <string name="uv_desc_high">High risk, protect yourself</string>
+    <string name="uv_desc_very_high">Very high risk, avoid midday sun</string>
+    <string name="uv_desc_extreme">Extreme risk, stay indoors</string>
+
+    <!-- ── MoonPhaseCard ──────────────────────────────────────── -->
+    <string name="moon_new">New Moon</string>
+    <string name="moon_waxing_crescent">Waxing Crescent</string>
+    <string name="moon_first_quarter">First Quarter</string>
+    <string name="moon_waxing_gibbous">Waxing Gibbous</string>
+    <string name="moon_full">Full Moon</string>
+    <string name="moon_waning_gibbous">Waning Gibbous</string>
+    <string name="moon_last_quarter">Last Quarter</string>
+    <string name="moon_waning_crescent">Waning Crescent</string>
+
+    <!-- ── CacheBanner ────────────────────────────────────────── -->
+    <!-- %1$s = time string e.g. "14:32, Mar 7" -->
+    <string name="offline_banner">⚡ Offline — showing data from %1$s</string>
+
+    <!-- ── Error screen ───────────────────────────────────────── -->
+    <string name="error_title">⚠️  Couldn\'t load weather</string>
+    <string name="error_retry">Retry</string>
+    <string name="day_monday">Mon</string>
+    <string name="day_tuesday">Tue</string>
+    <string name="day_wednesday">Wed</string>
+    <string name="day_thursday">Thu</string>
+    <string name="day_friday">Fri</string>
+    <string name="day_saturday">Sat</string>
+    <string name="day_sunday">Sun</string>
+    <!-- ── Settings screen ───────────────────────────────────── -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
 </resources>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">الطقس</string>
+
+    <!-- ── TopBar ─────────────────────────────────────────────── -->
+    <string name="menu_switch_to_fahrenheit">التحويل إلى °F</string>
+    <string name="menu_switch_to_celsius">التحويل إلى °C</string>
+    <string name="menu_settings">الإعدادات</string>
+
+    <!-- ── HourlyWeatherCard ──────────────────────────────────── -->
+    <string name="hourly_weather">الطقس بالساعة</string>
+    <string name="label_now">الآن</string>
+
+    <!-- ── ForecastCard ───────────────────────────────────────── -->
+    <string name="weather_forecast">توقعات الطقس</string>
+    <string name="extended_forecast">توقعات موسّعة</string>
+
+    <!-- ── Detail card titles ─────────────────────────────────── -->
+    <string name="card_uv_index">مؤشر الأشعة فوق البنفسجية</string>
+    <string name="card_feels_like">يبدو كـ</string>
+    <string name="card_wind_force">قوة الرياح</string>
+    <string name="card_sunset">الغروب</string>
+    <string name="card_humidity">الرطوبة</string>
+    <string name="card_visibility">الرؤية</string>
+    <string name="card_pressure">الضغط</string>
+    <string name="card_moon_phase">طور القمر</string>
+
+    <!-- ── FeelsLikeCard ──────────────────────────────────────── -->
+    <string name="actual_temperature">درجة الحرارة الفعلية: %1$s°</string>
+    <string name="feels_warmer">يبدو أدفأ من درجة الحرارة الفعلية</string>
+    <string name="feels_colder">يبدو أبرد من درجة الحرارة الفعلية</string>
+    <string name="feels_similar">يبدو مشابهاً لدرجة الحرارة الفعلية</string>
+    <string name="day_today">اليوم</string>
+    <string name="day_monday">الاثنين</string>
+    <string name="day_tuesday">الثلاثاء</string>
+    <string name="day_wednesday">الأربعاء</string>
+    <string name="day_thursday">الخميس</string>
+    <string name="day_friday">الجمعة</string>
+    <string name="day_saturday">السبت</string>
+    <string name="day_sunday">الأحد</string>
+    <!-- ── VisibilityCard ─────────────────────────────────────── -->
+    <string name="visibility_low">منخفضة</string>
+    <string name="visibility_high">عالية</string>
+    <string name="visibility_unit">كم</string>
+    <string name="visibility_excellent">رؤية ممتازة</string>
+    <string name="visibility_good">رؤية جيدة</string>
+    <string name="visibility_moderate">رؤية متوسطة</string>
+    <string name="visibility_poor">رؤية ضعيفة</string>
+    <string name="visibility_very_poor">رؤية ضعيفة جداً</string>
+
+    <!-- ── WindCard ───────────────────────────────────────────── -->
+    <string name="wind_unit">بوفور</string>
+    <!-- %1$s = cardinal direction  %2$s = Beaufort description -->
+    <string name="wind_description">رياح %1$s، %2$s</string>
+
+    <!-- Beaufort scale descriptions -->
+    <string name="bft_0">هادئ</string>
+    <string name="bft_1">نسيم خفيف جداً</string>
+    <string name="bft_2">نسيم خفيف</string>
+    <string name="bft_3">نسيم لطيف</string>
+    <string name="bft_4">نسيم معتدل</string>
+    <string name="bft_5">نسيم منعش</string>
+    <string name="bft_6">نسيم قوي</string>
+    <string name="bft_7">رياح قوية</string>
+    <string name="bft_8">عاصفة خفيفة</string>
+    <string name="bft_9">عاصفة قوية</string>
+    <string name="bft_10">عاصفة</string>
+    <string name="bft_11">عاصفة عنيفة</string>
+    <string name="bft_12">إعصار</string>
+
+    <!-- ── PressureCard ───────────────────────────────────────── -->
+    <string name="pressure_unit">هكتوباسكال</string>
+    <string name="pressure_very_low">ضغط منخفض جداً، عاصفة</string>
+    <string name="pressure_low">ضغط منخفض</string>
+    <string name="pressure_slightly_low">ضغط منخفض قليلاً</string>
+    <string name="pressure_normal">ضغط طبيعي</string>
+    <string name="pressure_slightly_high">ضغط مرتفع قليلاً</string>
+    <string name="pressure_high">ضغط مرتفع، مستقر</string>
+
+    <!-- ── HumidityCard ───────────────────────────────────────── -->
+    <string name="humidity_very_dry">هواء جاف جداً</string>
+    <string name="humidity_comfortable">رطوبة مريحة</string>
+    <string name="humidity_slightly">رطوبة خفيفة</string>
+    <string name="humidity_fairly">رطوبة عالية، قد يتشكّل الندى</string>
+    <string name="humidity_high">رطوبة عالية</string>
+    <string name="humidity_very_high">رطوبة عالية جداً</string>
+
+    <!-- ── SunCard ────────────────────────────────────────────── -->
+    <string name="sunrise_label">الشروق: %1$s</string>
+
+    <!-- ── UvIndexCard ────────────────────────────────────────── -->
+    <string name="uv_minimal">ضئيل</string>
+    <string name="uv_moderate">معتدل</string>
+    <string name="uv_high">مرتفع</string>
+    <string name="uv_very_high">مرتفع جداً</string>
+    <string name="uv_extreme">شديد الخطورة</string>
+    <string name="uv_desc_minimal">لا يكاد يكون هناك خطر من حروق الشمس</string>
+    <string name="uv_desc_moderate">خطر بسيط، استخدم واقي الشمس</string>
+    <string name="uv_desc_high">خطر مرتفع، احمِ نفسك</string>
+    <string name="uv_desc_very_high">خطر مرتفع جداً، تجنب الشمس وقت الظهيرة</string>
+    <string name="uv_desc_extreme">خطر شديد، ابقَ في الداخل</string>
+
+    <!-- ── MoonPhaseCard ──────────────────────────────────────── -->
+    <string name="moon_new">محاق</string>
+    <string name="moon_waxing_crescent">هلال متزايد</string>
+    <string name="moon_first_quarter">التربيع الأول</string>
+    <string name="moon_waxing_gibbous">أحدب متزايد</string>
+    <string name="moon_full">بدر</string>
+    <string name="moon_waning_gibbous">أحدب متناقص</string>
+    <string name="moon_last_quarter">التربيع الأخير</string>
+    <string name="moon_waning_crescent">هلال متناقص</string>
+
+    <!-- ── CacheBanner ────────────────────────────────────────── -->
+    <string name="offline_banner">⚡ غير متصل — البيانات من %1$s</string>
+
+    <!-- ── Error screen ───────────────────────────────────────── -->
+    <string name="error_title">⚠️ تعذّر تحميل الطقس</string>
+    <string name="error_retry">إعادة المحاولة</string>
+
+    <!-- ── Settings screen ───────────────────────────────────── -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_language">اللغة</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
+</resources>
