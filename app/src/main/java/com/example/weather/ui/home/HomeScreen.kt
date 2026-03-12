@@ -27,36 +27,36 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    cityName           : String,
-    countryCode        : String,
-    currentTemp        : String,
-    unitSymbol         : String,
-    highTemp           : String,
-    lowTemp            : String,
-    weatherDescription : String,
-    feelsLike          : String,
-    actualTemp         : String,
-    feelsLikeRaw       : Double,
-    actualTempRaw      : Double,
-    uvIndex            : Int,
-    windSpeedBft       : Int,
-    windDeg            : Int,
-    humidity           : Int,
-    visibilityKm       : Int,
-    pressure           : Int,
-    sunriseTime        : String,
-    sunsetTime         : String,
-    moonPhaseRaw       : Double,
-    hourlyItems        : List<HourlyItem>,
-    dailyItems         : List<DailyItem>,
-    units              : String  = "metric",
-    isRefreshing       : Boolean = false,
-    isFromCache        : Boolean = false,
-    cachedAtEpochMs    : Long    = 0L,
-    onRefresh          : () -> Unit = {},
-    onUnitsToggle      : () -> Unit = {},
-    onSettingsClick    : () -> Unit = {},
-    onMenuClick        : () -> Unit = {},
+    cityName               : String,
+    countryCode            : String,
+    currentTemp            : String,
+    unitSymbol             : String,
+    highTemp               : String,
+    lowTemp                : String,
+    weatherDescription     : String,
+    feelsLike              : String,
+    actualTemp             : String,
+    feelsLikeRaw           : Double,
+    actualTempRaw          : Double,
+    uvIndex                : Int,
+    windSpeedBft           : Int,
+    windDeg                : Int,
+    humidity               : Int,
+    visibilityKm           : Int,
+    pressure               : Int,
+    sunriseTime            : String,
+    sunsetTime             : String,
+    moonPhaseRaw           : Double,
+    hourlyItems            : List<HourlyItem>,
+    dailyItems             : List<DailyItem>,
+    units                  : String  = "metric",
+    isRefreshing           : Boolean = false,
+    isFromCache            : Boolean = false,
+    cachedAtEpochMs        : Long    = 0L,
+    onRefresh              : () -> Unit = {},
+    onUnitsToggle          : () -> Unit = {},
+    onSettingsClick        : () -> Unit = {},
+    onMenuClick            : () -> Unit = {},
     onExtendedForecastClick: () -> Unit = {}
 ) {
     val pullState = rememberPullToRefreshState()
@@ -67,6 +67,7 @@ fun HomeScreen(
         state        = pullState,
         modifier     = Modifier.fillMaxSize()
     ) {
+        // Decorative radial highlight behind the hero section
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,6 +89,7 @@ fun HomeScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
+            // TopBar owns its own glass popup menu — no ModalBottomSheet needed here
             TopBar(
                 cityName        = cityName,
                 countryCode     = countryCode,
@@ -99,52 +101,37 @@ fun HomeScreen(
 
             if (isFromCache) CacheBanner(cachedAtEpochMs = cachedAtEpochMs)
 
-            HeroSection(
-                currentTemp = currentTemp,
-                unitSymbol  = unitSymbol,
-                highTemp    = highTemp,
-                lowTemp     = lowTemp
-            )
+            HeroSection(currentTemp, unitSymbol, highTemp, lowTemp)
 
-            Spacer(modifier = Modifier.height(24.dp))
-
+            Spacer(Modifier.height(24.dp))
             HourlyWeatherCard(items = hourlyItems)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+            Spacer(Modifier.height(12.dp))
             ForecastCard(items = dailyItems, onExtendedForecastClick = onExtendedForecastClick)
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             Column(
                 modifier            = Modifier.padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    UvIndexCard(uvIndex = uvIndex, modifier = Modifier.weight(1f))
-                    FeelsLikeCard(
-                        feelsLike     = feelsLike,
-                        actualTemp    = actualTemp,
-                        feelsLikeRaw  = feelsLikeRaw,
-                        actualTempRaw = actualTempRaw,
-                        modifier      = Modifier.weight(1f)
-                    )
+                    UvIndexCard(uvIndex, Modifier.weight(1f))
+                    FeelsLikeCard(feelsLike, actualTemp, feelsLikeRaw, actualTempRaw, Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    WindCard(speedBft = windSpeedBft, deg = windDeg, modifier = Modifier.weight(1f))
-                    SunCard(sunriseTime = sunriseTime, sunsetTime = sunsetTime, modifier = Modifier.weight(1f))
+                    WindCard(windSpeedBft, windDeg, Modifier.weight(1f))
+                    SunCard(sunriseTime, sunsetTime, Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HumidityCard(humidity = humidity, modifier = Modifier.weight(1f))
-                    VisibilityCard(visibilityKm = visibilityKm, modifier = Modifier.weight(1f))
+                    HumidityCard(humidity, Modifier.weight(1f))
+                    VisibilityCard(visibilityKm, Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PressureCard(pressure = pressure, modifier = Modifier.weight(1f))
-                    MoonPhaseCard(moonPhaseRaw = moonPhaseRaw, modifier = Modifier.weight(1f))
+                    PressureCard(pressure, Modifier.weight(1f))
+                    MoonPhaseCard(moonPhaseRaw, Modifier.weight(1f))
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -156,7 +143,7 @@ private fun CacheBanner(cachedAtEpochMs: Long) {
         else SimpleDateFormat("HH:mm, MMM d", Locale.getDefault()).format(Date(cachedAtEpochMs))
     }
     Box(
-        modifier = Modifier
+        modifier         = Modifier
             .fillMaxWidth()
             .background(Color(0xFFFFA000).copy(alpha = 0.85f))
             .padding(vertical = 6.dp, horizontal = 16.dp),
