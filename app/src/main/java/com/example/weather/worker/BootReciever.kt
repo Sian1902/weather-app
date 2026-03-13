@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Reschedules the daily weather alarm after the device reboots.
- * AlarmManager alarms are wiped on reboot — this receiver restores them.
+ * Restores both the daily notification alarm and the daily weather alarm after reboot.
+ * AlarmManager alarms are wiped when the device restarts — this receiver reschedules them.
  */
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -21,11 +21,16 @@ class BootReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val prefs = UserPreferencesDataSourceImpl(context).userPreferences.first()
+
                 if (prefs.notificationsEnabled) {
                     WeatherNotificationReceiver.scheduleDaily(
-                        context,
-                        prefs.notificationHour,
-                        prefs.notificationMinute
+                        context, prefs.notificationHour, prefs.notificationMinute
+                    )
+                }
+
+                if (prefs.alarmEnabled) {
+                    WeatherAlarmReceiver.scheduleDaily(
+                        context, prefs.alarmHour, prefs.alarmMinute
                     )
                 }
             } finally {

@@ -137,4 +137,10 @@
     <string name="notif_exact_alarm_title">إذن مطلوب</string>
     <string name="notif_exact_alarm_desc">امنح إذن «التنبيهات والتذكيرات» حتى تصل الإشعارات في الوقت المحدد</string>
     <string name="notif_exact_alarm_grant">منح</string>
+    <string name="settings_alarm">المنبّه</string>
+    <string name="settings_alarm_daily">منبّه الطقس اليومي</string>
+    <string name="settings_alarm_daily_desc">استيقظ على طقس اليوم مع صوت المنبّه</string>
+    <string name="settings_alarm_time">وقت المنبّه</string>
+    <string name="settings_alarm_time_desc">اضغط لاختيار وقت رنين المنبّه</string>
+    <string name="settings_alarm_pick_time">اختر وقت المنبّه</string>
 </resources>

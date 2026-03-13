@@ -109,7 +109,6 @@ class MainActivity : ComponentActivity() {
                             homeFactory      = homeFactory,
                             prefsDataSource  = prefsDataSource,
                             appContext        = applicationContext,
-                            currentLanguage  = language,
                             onLanguageChange = { newLang -> language = newLang }
                         )
                     }
@@ -126,7 +125,6 @@ private fun AppRoot(
     homeFactory    : HomeViewModel.Factory,
     prefsDataSource: com.example.weather.data.local.UserPreferencesDataSource,
     appContext     : android.content.Context,
-    currentLanguage: String,
     onLanguageChange: (String) -> Unit
 ) {
     // HomeViewModel lives here so both WeatherRoot and SettingsScreen share the same instance.
@@ -153,7 +151,6 @@ private fun AppRoot(
     } else {
         WeatherRoot(
             viewModel       = homeViewModel,
-            currentLanguage = currentLanguage,
             onSettingsClick = { showSettings = true }
         )
     }
@@ -164,7 +161,6 @@ private fun AppRoot(
 @Composable
 private fun WeatherRoot(
     viewModel      : HomeViewModel,
-    currentLanguage: String,
     onSettingsClick: () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -173,10 +169,6 @@ private fun WeatherRoot(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val units        by viewModel.units.collectAsState()
 
-    // Re-fetch whenever language changes so API returns descriptions in the correct language
-    LaunchedEffect(currentLanguage) {
-        viewModel.onLanguageChanged(currentLanguage)
-    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -254,8 +246,6 @@ private fun WeatherRoot(
         )
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun LoadingScreen() {

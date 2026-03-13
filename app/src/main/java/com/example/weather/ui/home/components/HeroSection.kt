@@ -16,7 +16,7 @@ import com.example.weather.ui.theme.WeatherColors
 @Composable
 fun HeroSection(
     currentTemp: String,
-    unitSymbol: String,   // "°C" or "°F"
+    unitSymbol: String,
     highTemp: String,
     lowTemp: String
 ) {
@@ -24,7 +24,7 @@ fun HeroSection(
         modifier            = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Use AnnotatedString so both parts are in ONE Text — immune to RTL reordering
+
         Text(
             text = buildAnnotatedString {
                 withStyle(SpanStyle(fontSize = 96.sp, fontWeight = FontWeight.Thin)) {

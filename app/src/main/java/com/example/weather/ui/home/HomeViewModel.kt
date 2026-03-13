@@ -38,11 +38,16 @@ class HomeViewModel(
 
     private var lastRequest: LastRequest? = null
 
+    // Set to true once the init coroutine has read DataStore.
+    // onLocationPermissionGranted waits for this before fetching.
+    private var prefsLoaded = false
+
     init {
         viewModelScope.launch {
             val prefs    = prefsDataSource.userPreferences.first()
             _units.value = prefs.units
             currentLang  = prefs.language
+            prefsLoaded  = true
         }
     }
 
@@ -50,20 +55,32 @@ class HomeViewModel(
 
     fun onLocationPermissionGranted() {
         viewModelScope.launch {
+            while (!prefsLoaded) kotlinx.coroutines.delay(10)
+
             _uiState.value = HomeUiState.Loading
             try {
+                // Try last-known first (instant). If null, request a fresh fix.
+                // Both are now suspend functions that return null on failure — no hanging.
                 val loc = locationProvider.getLastLocation()
-                    ?: locationProvider.getCurrentLocation().first()
-                lastRequest = LastRequest.ByCoords(loc.latitude, loc.longitude, _units.value, currentLang)
-                fetchByCoords(loc.latitude, loc.longitude, _units.value, currentLang)
+                    ?: locationProvider.getCurrentLocation()
+
+                if (loc != null) {
+                    lastRequest = LastRequest.ByCoords(loc.latitude, loc.longitude, _units.value, currentLang)
+                    fetchByCoords(loc.latitude, loc.longitude, _units.value, currentLang)
+                } else {
+                    _uiState.value = HomeUiState.Error("Unable to get your location. Please make sure GPS is enabled and try again.")
+                }
             } catch (e: Exception) {
-                loadWeatherByCityName("Cairo")
+                _uiState.value = HomeUiState.Error(e.message ?: "Unable to get location.")
             }
         }
     }
 
     fun onLocationPermissionDenied() {
-        loadWeatherByCityName("Cairo")
+        viewModelScope.launch {
+            while (!prefsLoaded) kotlinx.coroutines.delay(10)
+            _uiState.value = HomeUiState.Error("Location permission is required to show your local weather.")
+        }
     }
 
     fun loadWeatherByCityName(
@@ -157,6 +174,8 @@ class HomeViewModel(
             _uiState.value = repository
                 .getWeatherWithCache(cityName, units, lang)
                 .toUiState()
+            // Persist so WeatherNotificationWorker always uses the real location
+            prefsDataSource.setLastLocationCity(cityName)
         } catch (e: Exception) {
             _uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
         }
@@ -167,6 +186,8 @@ class HomeViewModel(
             _uiState.value = repository
                 .getWeatherWithCacheByCoords(lat, lon, units, lang)
                 .toUiState()
+            // Persist coords so the notification worker uses real GPS location
+            prefsDataSource.setLastLocationCoords(lat, lon)
         } catch (e: Exception) {
             _uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
         }

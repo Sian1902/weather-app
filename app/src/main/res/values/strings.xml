@@ -138,4 +138,10 @@
     <string name="notif_exact_alarm_title">Permission required</string>
     <string name="notif_exact_alarm_desc">Grant \"Alarms &amp; reminders\" so notifications arrive on time</string>
     <string name="notif_exact_alarm_grant">Grant</string>
+    <string name="settings_alarm">Alarm</string>
+    <string name="settings_alarm_daily">Daily Weather Alarm</string>
+    <string name="settings_alarm_daily_desc">Wake up with today\'s weather and an alarm sound</string>
+    <string name="settings_alarm_time">Alarm Time</string>
+    <string name="settings_alarm_time_desc">Tap to choose when the alarm rings</string>
+    <string name="settings_alarm_pick_time">Choose Alarm Time</string>
 </resources>

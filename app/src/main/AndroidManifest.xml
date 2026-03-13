@@ -16,6 +16,12 @@
     <!-- Reschedule alarm after device reboot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Required for the alarm full-screen intent to show on the lock screen (Android 11+) -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <!-- Vibration for the alarm -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -37,10 +43,34 @@
             </intent-filter>
         </activity>
 
+        <!-- Full-screen alarm screen shown on lock screen when alarm fires -->
+        <activity
+            android:name=".AlarmActivity"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.Weather" />
+
+        <!-- Fires the daily weather notification at the exact scheduled time -->
         <receiver
             android:name=".worker.WeatherNotificationReceiver"
             android:exported="false" />
 
+        <!-- Fires the daily weather alarm (with sound) at the exact scheduled time -->
+        <receiver
+            android:name=".worker.WeatherAlarmReceiver"
+            android:exported="false" />
+
+        <!-- Handles the Dismiss button on the alarm notification -->
+        <receiver
+            android:name=".worker.AlarmDismissReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.weather.ACTION_DISMISS_ALARM" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Restores the alarm after the device reboots (AlarmManager alarms don't survive reboots) -->
         <receiver
             android:name=".worker.BootReceiver"
             android:exported="true">

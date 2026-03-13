@@ -48,11 +48,23 @@ class WeatherNotificationReceiver : BroadcastReceiver() {
 
                 val apiKey  = BuildConfig.WEATHER_API_KEY
                 val remote  = WeatherRemoteDataSourceImpl(RetrofitClient.weatherApiService, apiKey)
-                val current = remote.getCurrentWeatherByCityName(
-                    cityName = "Cairo",
-                    units    = prefs.units,
-                    lang     = prefs.language
-                )
+
+                // Use the real last-known location persisted by HomeViewModel.
+                // Prefer GPS coords when available, fall back to city name.
+                val current = if (prefs.lastLat != null && prefs.lastLon != null) {
+                    remote.getCurrentWeatherByCoordinates(
+                        lat   = prefs.lastLat,
+                        lon   = prefs.lastLon,
+                        units = prefs.units,
+                        lang  = prefs.language
+                    )
+                } else {
+                    remote.getCurrentWeatherByCityName(
+                        cityName = prefs.lastCityName,
+                        units    = prefs.units,
+                        lang     = prefs.language
+                    )
+                }
 
                 val temp = current.main.temp.toInt()
                 val unit = if (prefs.units == "metric") "°C" else "°F"
