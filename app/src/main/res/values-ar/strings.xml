@@ -122,5 +122,19 @@
     <string name="settings_language">اللغة</string>
     <string name="language_english">English</string>
     <string name="language_arabic">العربية</string>
-    <string name="settings_units">Units\n</string>
+    <string name="settings_units">وحدة درجة الحرارة</string>
+    <string name="units_celsius">مئوية °C</string>
+    <string name="units_fahrenheit">فهرنهايت °F</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_notif_daily">تحديث الطقس اليومي</string>
+    <string name="settings_notif_daily_desc">احصل على ملخص صباحي لطقس اليوم</string>
+    <string name="settings_notif_time">وقت الإشعار</string>
+    <string name="settings_notif_time_desc">اضغط لاختيار وقت الإشعار</string>
+    <string name="settings_notif_pick_time">اختر الوقت</string>
+    <string name="settings_ok">موافق</string>
+    <string name="settings_cancel">إلغاء</string>
+    <string name="settings_back">رجوع</string>
+    <string name="notif_exact_alarm_title">إذن مطلوب</string>
+    <string name="notif_exact_alarm_desc">امنح إذن «التنبيهات والتذكيرات» حتى تصل الإشعارات في الوقت المحدد</string>
+    <string name="notif_exact_alarm_grant">منح</string>
 </resources>

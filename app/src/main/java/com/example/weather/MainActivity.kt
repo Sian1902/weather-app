@@ -2,9 +2,9 @@ package com.example.weather
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -40,11 +39,12 @@ import com.example.weather.ui.home.HomeUiState
 import com.example.weather.ui.home.HomeViewModel
 import com.example.weather.ui.settings.SettingsScreen
 import com.example.weather.ui.settings.SettingsViewModel
+import com.example.weather.data.local.UserPreferencesDataSource
 import com.example.weather.ui.theme.WeatherColors
 import com.example.weather.ui.theme.WeatherTheme
-import com.example.weather.util.LocaleHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
@@ -53,49 +53,44 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Extend content behind both status bar and nav bar so the gradient fills edge-to-edge
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // Dependencies
-        val apiKey = BuildConfig.WEATHER_API_KEY
-        val dataSource = WeatherRemoteDataSourceImpl(RetrofitClient.weatherApiService, apiKey)
-        val localSource = WeatherLocalDataSourceImpl(applicationContext)
-        val prefsDataSource = UserPreferencesDataSourceImpl(applicationContext)
-        val repository = WeatherRepositoryImpl(dataSource, localSource)
+        val apiKey           = BuildConfig.WEATHER_API_KEY
+        val dataSource       = WeatherRemoteDataSourceImpl(RetrofitClient.weatherApiService, apiKey)
+        val localSource      = WeatherLocalDataSourceImpl(applicationContext)
+        val prefsDataSource  = UserPreferencesDataSourceImpl(applicationContext)
+        val repository       = WeatherRepositoryImpl(dataSource, localSource)
         val locationProvider = LocationProviderImpl(applicationContext)
 
-        // Get initial language for state
+        // Read initial saved language before first frame — keeps startup locale correct
         val initialLanguage = runBlocking { prefsDataSource.userPreferences.first().language }
 
+        // No contextProvider lambda needed — we no longer use WeatherStringProvider
         homeFactory = HomeViewModel.Factory(
-            repository = repository,
+            repository       = repository,
             locationProvider = locationProvider,
-            prefsDataSource = prefsDataSource
+            prefsDataSource  = prefsDataSource
         )
+        // settingsFactory is built inside AppRoot where HomeViewModel is accessible,
+        // so we only need prefsDataSource here — see AppRoot below.
 
         setContent {
-            val activityContext = LocalContext.current // The actual Activity
+            // 'language' state drives locale — changing it recomposes everything below.
+            // NO Activity.recreate() → NO black bar flash.
             var language by remember { mutableStateOf(initialLanguage) }
 
-            // Create localized context for strings/layout
-            val localizedContext = remember(language) {
-                LocaleHelper.applyLocale(activityContext, language)
+            // Build a Configuration carrying the chosen locale for stringResource() to use
+            val localizedConfig = remember(language) {
+                val locale = Locale(language)
+                Locale.setDefault(locale)
+                Configuration(resources.configuration).also { it.setLocale(locale) }
             }
 
-            // Create Settings Factory
-            val settingsFactory = remember(prefsDataSource) {
-                SettingsViewModel.Factory(
-                    prefsDataSource = prefsDataSource,
-                    onLanguageChanged = { newLang -> language = newLang }
-                )
-            }
-
-            // Provide localized context for strings, but keep activity for Registry
             CompositionLocalProvider(
-                LocalContext provides localizedContext,
-                LocalConfiguration provides localizedContext.resources.configuration,
-                LocalLayoutDirection provides if (language == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr,
-                // FIX: Re-provide the original activity as the Registry Owner
-                LocalActivityResultRegistryOwner provides (activityContext as ComponentActivity)
+                LocalConfiguration   provides localizedConfig,
+                LocalLayoutDirection provides if (language == "ar") LayoutDirection.Rtl
+                else LayoutDirection.Ltr
             ) {
                 WeatherTheme {
                     Box(
@@ -111,10 +106,11 @@ class MainActivity : ComponentActivity() {
                             )
                     ) {
                         AppRoot(
-                            homeFactory = homeFactory,
-                            settingsFactory = settingsFactory,
-                            currentLanguage = language,
-                            onLanguageChange = { language = it }
+                            homeFactory      = homeFactory,
+                            prefsDataSource  = prefsDataSource,
+                            appContext        = applicationContext,
+                            currentLanguage  = language,
+                            onLanguageChange = { newLang -> language = newLang }
                         )
                     }
                 }
@@ -123,44 +119,61 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+
 @Composable
 private fun AppRoot(
-    homeFactory: HomeViewModel.Factory,
-    settingsFactory: SettingsViewModel.Factory,
+    homeFactory    : HomeViewModel.Factory,
+    prefsDataSource: com.example.weather.data.local.UserPreferencesDataSource,
+    appContext     : android.content.Context,
     currentLanguage: String,
     onLanguageChange: (String) -> Unit
 ) {
-    var showSettings by remember { mutableStateOf(false) }
+    // HomeViewModel lives here so both WeatherRoot and SettingsScreen share the same instance.
+    val homeViewModel: HomeViewModel = viewModel(factory = homeFactory)
+    var showSettings  by remember { mutableStateOf(false) }
+
+    // Build settingsFactory once; recreate only when homeViewModel identity changes (it won't).
+    val settingsFactory = remember(homeViewModel) {
+        SettingsViewModel.Factory(
+            prefsDataSource   = prefsDataSource,
+            appContext        = appContext,
+            onLanguageChanged = onLanguageChange,
+            onUnitsToggled    = { homeViewModel.toggleUnits() }
+        )
+    }
 
     if (showSettings) {
         val settingsViewModel: SettingsViewModel = viewModel(factory = settingsFactory)
         SettingsScreen(
-            viewModel = settingsViewModel,
-            onBack = { showSettings = false },
+            viewModel        = settingsViewModel,
+            onBack           = { showSettings = false },
             onLanguageChange = onLanguageChange
         )
     } else {
         WeatherRoot(
-            homeFactory = homeFactory,
+            viewModel       = homeViewModel,
             currentLanguage = currentLanguage,
             onSettingsClick = { showSettings = true }
         )
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+
 @Composable
 private fun WeatherRoot(
-    homeFactory: HomeViewModel.Factory,
+    viewModel      : HomeViewModel,
     currentLanguage: String,
     onSettingsClick: () -> Unit
 ) {
-    val viewModel: HomeViewModel = viewModel(factory = homeFactory)
-    val context = LocalContext.current // This is localizedContext from provider
+    val context = androidx.compose.ui.platform.LocalContext.current
 
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState      by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val units by viewModel.units.collectAsState()
+    val units        by viewModel.units.collectAsState()
 
+    // Re-fetch whenever language changes so API returns descriptions in the correct language
     LaunchedEffect(currentLanguage) {
         viewModel.onLanguageChanged(currentLanguage)
     }
@@ -171,16 +184,17 @@ private fun WeatherRoot(
         val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
                 || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         if (granted) viewModel.onLocationPermissionGranted()
-        else viewModel.onLocationPermissionDenied()
+        else         viewModel.onLocationPermissionDenied()
     }
 
     LaunchedEffect(Unit) {
-        val granted = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+        val granted =
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(
+                        context, Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
         if (granted) viewModel.onLocationPermissionGranted()
         else permissionLauncher.launch(
             arrayOf(
@@ -192,40 +206,56 @@ private fun WeatherRoot(
 
     when (val state = uiState) {
         is HomeUiState.Loading -> LoadingScreen()
-        is HomeUiState.Error -> ErrorScreen(message = state.message, onRetry = { viewModel.refresh() })
+        is HomeUiState.Error   -> ErrorScreen(
+            message = state.message,
+            onRetry = {
+                val granted = ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+                if (granted) viewModel.onLocationPermissionGranted()
+                else permissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        )
         is HomeUiState.Success -> HomeScreen(
-            cityName = state.cityName,
-            countryCode = state.countryCode,
-            currentTemp = state.currentTemp,
-            unitSymbol = state.unitSymbol,
-            highTemp = state.highTemp,
-            lowTemp = state.lowTemp,
-            weatherDescription = state.weatherDescription,
-            feelsLike = state.feelsLike,
-            actualTemp = state.actualTemp,
-            feelsLikeRaw = state.feelsLikeRaw,
-            actualTempRaw = state.actualTempRaw,
-            uvIndex = state.uvIndex,
-            windSpeedBft = state.windSpeedBft,
-            windDeg = state.windDeg,
-            humidity = state.humidity,
-            visibilityKm = state.visibilityKm,
-            pressure = state.pressure,
-            sunriseTime = state.sunriseTime,
-            sunsetTime = state.sunsetTime,
-            moonPhaseRaw = state.moonPhaseRaw,
-            hourlyItems = state.hourlyItems,
-            dailyItems = state.dailyItems,
-            isRefreshing = isRefreshing,
-            isFromCache = state.isFromCache,
-            cachedAtEpochMs = state.cachedAtEpochMs,
-            units = units,
-            onRefresh = { viewModel.refresh() },
-            onUnitsToggle = { viewModel.toggleUnits() },
-            onSettingsClick = onSettingsClick
+            cityName              = state.cityName,
+            countryCode           = state.countryCode,
+            currentTemp           = state.currentTemp,
+            unitSymbol            = state.unitSymbol,
+            highTemp              = state.highTemp,
+            lowTemp               = state.lowTemp,
+            weatherDescription    = state.weatherDescription,
+            feelsLike             = state.feelsLike,
+            actualTemp            = state.actualTemp,
+            feelsLikeRaw          = state.feelsLikeRaw,
+            actualTempRaw         = state.actualTempRaw,
+            uvIndex               = state.uvIndex,
+            windSpeedBft          = state.windSpeedBft,
+            windDeg               = state.windDeg,
+            humidity              = state.humidity,
+            visibilityKm          = state.visibilityKm,
+            pressure              = state.pressure,
+            sunriseTime           = state.sunriseTime,
+            sunsetTime            = state.sunsetTime,
+            moonPhaseRaw          = state.moonPhaseRaw,
+            hourlyItems           = state.hourlyItems,
+            dailyItems            = state.dailyItems,
+            isRefreshing          = isRefreshing,
+            isFromCache           = state.isFromCache,
+            cachedAtEpochMs       = state.cachedAtEpochMs,
+            units                 = units,
+            onRefresh             = { viewModel.refresh() },
+            onUnitsToggle         = { viewModel.toggleUnits() },
+            onSettingsClick       = onSettingsClick
         )
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun LoadingScreen() {
@@ -240,10 +270,20 @@ private fun ErrorScreen(message: String, onRetry: () -> Unit) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(24.dp)
+            modifier            = Modifier.padding(24.dp)
         ) {
-            Text(stringResource(R.string.error_title), color = Color.White, fontSize = 18.sp)
-            Text(message, color = Color.White.copy(alpha = 0.7f), fontSize = 13.sp, textAlign = TextAlign.Center)
+            Text(
+                stringResource(R.string.error_title),
+                color     = Color.White,
+                fontSize  = 18.sp,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                message,
+                color     = Color.White.copy(alpha = 0.7f),
+                fontSize  = 13.sp,
+                textAlign = TextAlign.Center
+            )
             androidx.compose.material3.TextButton(onClick = onRetry) {
                 Text(stringResource(R.string.error_retry), color = Color.White)
             }

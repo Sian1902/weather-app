@@ -123,5 +123,19 @@
     <string name="settings_language">Language</string>
     <string name="language_english">English</string>
     <string name="language_arabic">العربية</string>
-    <string name="settings_units">Units\n</string>
+    <string name="settings_units">Temperature Unit</string>
+    <string name="units_celsius">Celsius °C</string>
+    <string name="units_fahrenheit">Fahrenheit °F</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_notif_daily">Daily Weather Update</string>
+    <string name="settings_notif_daily_desc">Get a morning summary of today\'s weather</string>
+    <string name="settings_notif_time">Notification Time</string>
+    <string name="settings_notif_time_desc">Tap to choose when to receive the alert</string>
+    <string name="settings_notif_pick_time">Choose Time</string>
+    <string name="settings_ok">OK</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_back">Back</string>
+    <string name="notif_exact_alarm_title">Permission required</string>
+    <string name="notif_exact_alarm_desc">Grant \"Alarms &amp; reminders\" so notifications arrive on time</string>
+    <string name="notif_exact_alarm_grant">Grant</string>
 </resources>

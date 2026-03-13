@@ -21,7 +21,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -102,47 +104,56 @@ fun TopBar(
                 )
             }
 
-            // Glass popup — positioned just below the three-dots button.
-            // Uses Popup (not DropdownMenu) so we can paint our own background
-            // without any white Material surface showing through.
+            val density       = LocalDensity.current
+            val offsetY       = with(density) { 52.dp.roundToPx() }
+            // Capture the localized values from the parent composition — Popup
+            // spawns a new window so it does NOT inherit CompositionLocals
+            // automatically. We re-provide them so stringResource() inside the
+            // popup reads the user's chosen language, not the system locale.
+            val configuration   = LocalConfiguration.current
+            val layoutDirection = LocalLayoutDirection.current
+
             if (menuExpanded) {
                 Popup(
-                    alignment          = Alignment.TopEnd,
-                    offset             = IntOffset(x = 0, y = 52),
-                    onDismissRequest   = { menuExpanded = false },
-                    properties         = PopupProperties(focusable = true)
+                    alignment        = Alignment.TopEnd,
+                    offset           = IntOffset(x = 0, y = offsetY),
+                    onDismissRequest = { menuExpanded = false },
+                    properties       = PopupProperties(focusable = true)
                 ) {
-                    GlassMenuCard(
-                        modifier = Modifier.width(220.dp)
+                    CompositionLocalProvider(
+                        LocalConfiguration   provides configuration,
+                        LocalLayoutDirection provides layoutDirection
                     ) {
-                        // ── Units row ─────────────────────────
-                        MenuRow(
-                            icon    = Icons.Default.SettingsSuggest,
-                            label   = stringResource(
-                                if (units == "metric") R.string.menu_switch_to_fahrenheit
-                                else                   R.string.menu_switch_to_celsius
-                            ),
-                            onClick = {
-                                menuExpanded = false
-                                onUnitsToggle()
-                            }
-                        )
+                        GlassMenuCard(modifier = Modifier.width(220.dp)) {
+                            // ── Units row ─────────────────────────
+                            MenuRow(
+                                icon    = Icons.Default.SettingsSuggest,
+                                label   = stringResource(
+                                    if (units == "metric") R.string.menu_switch_to_fahrenheit
+                                    else                   R.string.menu_switch_to_celsius
+                                ),
+                                onClick = {
+                                    menuExpanded = false
+                                    onUnitsToggle()
+                                }
+                            )
 
-                        HorizontalDivider(
-                            color     = WeatherColors.Divider,
-                            thickness = 0.5.dp,
-                            modifier  = Modifier.padding(horizontal = 8.dp)
-                        )
+                            HorizontalDivider(
+                                color     = WeatherColors.Divider,
+                                thickness = 0.5.dp,
+                                modifier  = Modifier.padding(horizontal = 8.dp)
+                            )
 
-                        // ── Settings row ──────────────────────
-                        MenuRow(
-                            icon    = Icons.Default.Tune,
-                            label   = stringResource(R.string.menu_settings),
-                            onClick = {
-                                menuExpanded = false
-                                onSettingsClick()
-                            }
-                        )
+                            // ── Settings row ──────────────────────
+                            MenuRow(
+                                icon    = Icons.Default.Tune,
+                                label   = stringResource(R.string.menu_settings),
+                                onClick = {
+                                    menuExpanded = false
+                                    onSettingsClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
