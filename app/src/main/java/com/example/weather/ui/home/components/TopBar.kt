@@ -152,24 +152,7 @@ fun TopBar(
                         androidx.compose.ui.platform.LocalContext   provides localizedContext
                     ) {
                         GlassMenuCard(modifier = Modifier.width(220.dp)) {
-                            // ── Units row ─────────────────────────
-                            MenuRow(
-                                icon    = Icons.Default.SettingsSuggest,
-                                label   = stringResource(
-                                    if (units == "metric") R.string.menu_switch_to_fahrenheit
-                                    else                   R.string.menu_switch_to_celsius
-                                ),
-                                onClick = {
-                                    menuExpanded = false
-                                    onUnitsToggle()
-                                }
-                            )
 
-                            HorizontalDivider(
-                                color     = WeatherColors.Divider,
-                                thickness = 0.5.dp,
-                                modifier  = Modifier.padding(horizontal = 8.dp)
-                            )
 
                             // ── Settings row ──────────────────────
                             MenuRow(

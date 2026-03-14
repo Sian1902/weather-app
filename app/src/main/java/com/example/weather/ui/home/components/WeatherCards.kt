@@ -29,18 +29,21 @@ fun GlassCard(
     }
 }
 
+/** Single source of truth for every detail-card height — all grid cards are this tall. */
+val CARD_HEIGHT = 200.dp
+
 @Composable
 fun DetailCard(
-    modifier: Modifier = Modifier,
-    minHeight: Dp = 150.dp,
-    content: @Composable ColumnScope.() -> Unit
+    modifier  : Modifier = Modifier,
+    minHeight : Dp = CARD_HEIGHT,   // kept for API compatibility — ignored internally
+    content   : @Composable ColumnScope.() -> Unit
 ) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .background(WeatherColors.CardBgDark)
             .padding(14.dp)
-            .defaultMinSize(minHeight = minHeight),
+            .height(CARD_HEIGHT),
         content = content
     )
 }
