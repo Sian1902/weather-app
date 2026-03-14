@@ -111,13 +111,7 @@
     <!-- ── Error screen ───────────────────────────────────────── -->
     <string name="error_title">⚠️  Couldn\'t load weather</string>
     <string name="error_retry">Retry</string>
-    <string name="day_monday">Mon</string>
-    <string name="day_tuesday">Tue</string>
-    <string name="day_wednesday">Wed</string>
-    <string name="day_thursday">Thu</string>
-    <string name="day_friday">Fri</string>
-    <string name="day_saturday">Sat</string>
-    <string name="day_sunday">Sun</string>
+
     <!-- ── Settings screen ───────────────────────────────────── -->
     <string name="settings_title">Settings</string>
     <string name="settings_language">Language</string>
@@ -144,4 +138,35 @@
     <string name="settings_alarm_time">Alarm Time</string>
     <string name="settings_alarm_time_desc">Tap to choose when the alarm rings</string>
     <string name="settings_alarm_pick_time">Choose Alarm Time</string>
+    <string name="manage_cities_title">Manage Cities</string>
+    <string name="manage_cities_add">Add city</string>
+    <string name="manage_cities_empty">No saved cities yet. Tap Add city to get started.</string>
+    <string name="add_city_title">Add City</string>
+    <string name="add_city_search_hint">Search for a place…</string>
+    <string name="add_city_hint">Tap on the map or search to select a location</string>
+    <string name="add_city_confirm">Add this city</string>
+    <string name="city_default_label">Default</string>
+    <string name="city_current_location">Current Location</string>
+    <string name="day_monday">Mon</string>
+    <string name="day_tuesday">Tue</string>
+    <string name="day_wednesday">Wed</string>
+    <string name="day_thursday">Thur</string>
+    <string name="day_friday">Fri</string>
+    <string name="day_saturday">Sat</string>
+    <string name="day_sunday">Sun</string>
+    <string name="temp_high_low">H:%1$s°  L:%2$s°</string>
+    <string name="label_wind">Wind</string>
+    <string name="wind_speed_unit">BFT</string>
+    <string name="desc_wind_direction">Wind direction</string>
+    <string name="menu_cities">Manage Cities</string>
+    <string name="page_indicator">Page %1$d of %2$d</string>
+
+
+    <string name="cache_recently">recently</string>
+
+    <string name="city_set_default">Set as default city</string>
+
+    <string name="city_delete">Delete city</string>
+    <string name="cd_menu">Open city list</string>
+    <string name="cd_more_options">More options</string>
 </resources>

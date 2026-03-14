@@ -5,41 +5,55 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weather.R
 import com.example.weather.ui.theme.WeatherColors
 
 @Composable
 fun HeroSection(
-    currentTemp: String,
-    unitSymbol: String,
-    highTemp: String,
-    lowTemp: String
+    temp: String,
+    unit: String,
+    high: String,
+    low: String,
+    description: String
 ) {
     Column(
         modifier            = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        // Main Temperature Display
         Text(
             text = buildAnnotatedString {
                 withStyle(SpanStyle(fontSize = 96.sp, fontWeight = FontWeight.Thin)) {
-                    append(currentTemp)
+                    append(temp)
                 }
                 withStyle(SpanStyle(fontSize = 36.sp, fontWeight = FontWeight.Thin)) {
-                    append(unitSymbol)
+                    append(unit)
                 }
             },
             color      = WeatherColors.TextPrimary,
             lineHeight = 100.sp
         )
-        Spacer(modifier = Modifier.height(4.dp))
+
+        // Weather Condition Description (e.g., "Partly Cloudy")
         Text(
-            text       = "$highTemp/$lowTemp",
+            text = description,
+            color = WeatherColors.TextPrimary,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Normal
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Localized High/Low temperatures
+        Text(
+            text       = stringResource(R.string.temp_high_low, high, low),
             color      = WeatherColors.TextPrimary,
             fontSize   = 18.sp,
             fontWeight = FontWeight.Light

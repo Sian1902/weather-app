@@ -6,21 +6,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weather.R
 import com.example.weather.ui.theme.WeatherColors
 
-/**
- * Feels-like card.
- * Needs both raw values to compare; resolves its own description from strings.xml.
- */
 @Composable
 fun FeelsLikeCard(
-    feelsLike     : String,   // display string, e.g. "18"
-    actualTemp    : String,   // display string, e.g. "20"
-    feelsLikeRaw  : Double,   // raw feels-like in current units
-    actualTempRaw : Double,   // raw actual temp in current units
+    feelsLike     : String,
+    actualTemp    : String,
+    feelsLikeRaw  : Double,
+    actualTempRaw : Double,
     modifier      : Modifier = Modifier
 ) {
     val description = when {
@@ -30,9 +27,14 @@ fun FeelsLikeCard(
     }
 
     DetailCard(modifier = modifier, minHeight = 160.dp) {
-        CardHeader(iconRes = R.drawable.ic_thermometer, title = stringResource(R.string.card_feels_like))
+        CardHeader(
+            iconRes = R.drawable.ic_thermometer,
+            title = stringResource(R.string.card_feels_like)
+        )
         Spacer(Modifier.height(8.dp))
         Text(
+            // Use a string resource for temperature if possible,
+            // otherwise ensure directionality for RTL
             text       = "$feelsLike°",
             color      = WeatherColors.TextPrimary,
             fontSize   = 36.sp,
@@ -42,9 +44,17 @@ fun FeelsLikeCard(
         Text(
             text     = stringResource(R.string.actual_temperature, actualTemp),
             color    = WeatherColors.TextSecondary,
-            fontSize = 12.sp
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Spacer(Modifier.height(8.dp))
-        Text(text = description, color = WeatherColors.TextSecondary, fontSize = 11.sp)
+        Text(
+            text     = description,
+            color    = WeatherColors.TextSecondary,
+            fontSize = 11.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

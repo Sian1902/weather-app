@@ -51,6 +51,20 @@ class HomeViewModel(
         }
     }
 
+    // Exposed so WeatherRoot can upsert the current-location city after a GPS fetch
+    sealed class LastRequestSnapshot {
+        data class ByCoords(val lat: Double, val lon: Double) : LastRequestSnapshot()
+        object ByCity : LastRequestSnapshot()
+        object None   : LastRequestSnapshot()
+    }
+
+    val lastRequestSnapshot: LastRequestSnapshot
+        get() = when (val r = lastRequest) {
+            is LastRequest.ByCoords -> LastRequestSnapshot.ByCoords(r.lat, r.lon)
+            is LastRequest.ByCity   -> LastRequestSnapshot.ByCity
+            null                    -> LastRequestSnapshot.None
+        }
+
     // ── Location permission callbacks ─────────────────────────────────────────
 
     fun onLocationPermissionGranted() {
@@ -92,6 +106,19 @@ class HomeViewModel(
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
             fetchByCityName(cityName, units, lang)
+        }
+    }
+
+    fun loadWeatherByCoords(
+        lat  : Double,
+        lon  : Double,
+        units: String = _units.value,
+        lang : String = currentLang
+    ) {
+        lastRequest = LastRequest.ByCoords(lat, lon, units, lang)
+        viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading
+            fetchByCoords(lat, lon, units, lang)
         }
     }
 

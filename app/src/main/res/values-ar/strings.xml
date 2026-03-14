@@ -137,10 +137,33 @@
     <string name="notif_exact_alarm_title">إذن مطلوب</string>
     <string name="notif_exact_alarm_desc">امنح إذن «التنبيهات والتذكيرات» حتى تصل الإشعارات في الوقت المحدد</string>
     <string name="notif_exact_alarm_grant">منح</string>
-    <string name="settings_alarm">المنبّه</string>
-    <string name="settings_alarm_daily">منبّه الطقس اليومي</string>
-    <string name="settings_alarm_daily_desc">استيقظ على طقس اليوم مع صوت المنبّه</string>
-    <string name="settings_alarm_time">وقت المنبّه</string>
-    <string name="settings_alarm_time_desc">اضغط لاختيار وقت رنين المنبّه</string>
-    <string name="settings_alarm_pick_time">اختر وقت المنبّه</string>
+    <string name="settings_alarm_pick_time">اختار موعد المنبه</string>
+    <string name="manage_cities_title">إدارة المدن</string>
+    <string name="manage_cities_add">إضافة مدينة</string>
+    <string name="manage_cities_empty">لا توجد مدن محفوظة. اضغط على إضافة مدينة للبدء.</string>
+    <string name="add_city_title">إضافة مدينة</string>
+    <string name="add_city_search_hint">ابحث عن مكان…</string>
+    <string name="add_city_hint">اضغط على الخريطة أو ابحث لتحديد موقع</string>
+    <string name="add_city_confirm">إضافة هذه المدينة</string>
+    <string name="city_default_label">الافتراضية</string>
+    <string name="city_current_location">الموقع الحالي</string>
+    <string name="temp_high_low">العظمى:%1$s°  الصغرى:%2$s°</string>
+    <string name="settings_alarm">منبه</string>
+    <string name="settings_alarm_daily">منبه الطقس اليومي</string>
+    <string name="settings_alarm_daily_desc">استيقظ مع طقس اليوم</string>
+    <string name="settings_alarm_time">موعد المنبه</string>
+    <string name="settings_alarm_time_desc">اختار موعد المنبه</string>
+    <string name="label_wind">الرياح</string>
+    <string name="wind_speed_unit">بوفورت</string>
+    <string name="desc_wind_direction">اتجاه الرياح</string>
+    <string name="menu_cities">إدارة المدن</string>
+    <string name="page_indicator">صفحة %1$d من %2$d</string>
+
+    <string name="cache_recently">منذ قليل</string>
+
+    <string name="city_set_default">تعيين كمدينة افتراضية</string>
+
+    <string name="city_delete">حذف المدينة</string>
+    <string name="cd_menu">فتح قائمة المدن</string>
+    <string name="cd_more_options">المزيد من الخيارات</string>
 </resources>

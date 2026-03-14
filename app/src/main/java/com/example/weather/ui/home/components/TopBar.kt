@@ -37,6 +37,8 @@ fun TopBar(
     cityName        : String,
     countryCode     : String,
     units           : String,
+    pageCount       : Int    = 1,
+    currentPage     : Int    = 0,
     onUnitsToggle   : () -> Unit,
     onSettingsClick : () -> Unit,
     onMenuClick     : () -> Unit
@@ -60,13 +62,13 @@ fun TopBar(
         ) {
             Icon(
                 painter            = painterResource(id = R.drawable.ic_menu_add),
-                contentDescription = "Menu",
+                contentDescription = stringResource(R.string.cd_menu),
                 tint               = WeatherColors.TextPrimary,
                 modifier           = Modifier.size(22.dp)
             )
         }
 
-        // ── Centre: city + country ────────────────────────────────
+        // ── Centre: city + country + page dots ───────────────────
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text       = cityName,
@@ -85,6 +87,24 @@ fun TopBar(
                     modifier           = Modifier.size(12.dp)
                 )
                 Text(text = countryCode, color = WeatherColors.TextSecondary, fontSize = 13.sp)
+
+                // Page indicator dots — only shown when there are multiple cities
+                if (pageCount > 1) {
+                    Spacer(Modifier.width(4.dp))
+                    repeat(pageCount) { index ->
+                        val selected = index == currentPage
+                        Box(
+                            modifier = Modifier
+                                .size(if (selected) 7.dp else 4.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (selected) WeatherColors.TextPrimary
+                                    else WeatherColors.TextPrimary.copy(alpha = 0.35f)
+                                )
+                        )
+                        if (index < pageCount - 1) Spacer(Modifier.width(3.dp))
+                    }
+                }
             }
         }
 
@@ -99,7 +119,7 @@ fun TopBar(
             ) {
                 Icon(
                     imageVector        = Icons.Default.MoreVert,
-                    contentDescription = "More",
+                    contentDescription = stringResource(R.string.cd_more_options),
                     tint               = WeatherColors.TextPrimary
                 )
             }
@@ -112,6 +132,12 @@ fun TopBar(
             // popup reads the user's chosen language, not the system locale.
             val configuration   = LocalConfiguration.current
             val layoutDirection = LocalLayoutDirection.current
+            // stringResource() resolves strings via LocalContext, not LocalConfiguration.
+            // The Popup window loses the localized context, so we must re-wrap it.
+            val baseContext     = androidx.compose.ui.platform.LocalContext.current
+            val localizedContext = remember(configuration) {
+                baseContext.createConfigurationContext(configuration)
+            }
 
             if (menuExpanded) {
                 Popup(
@@ -121,8 +147,9 @@ fun TopBar(
                     properties       = PopupProperties(focusable = true)
                 ) {
                     CompositionLocalProvider(
-                        LocalConfiguration   provides configuration,
-                        LocalLayoutDirection provides layoutDirection
+                        LocalConfiguration                          provides configuration,
+                        LocalLayoutDirection                        provides layoutDirection,
+                        androidx.compose.ui.platform.LocalContext   provides localizedContext
                     ) {
                         GlassMenuCard(modifier = Modifier.width(220.dp)) {
                             // ── Units row ─────────────────────────
@@ -161,6 +188,12 @@ fun TopBar(
     }
 }
 
+// ── Shared helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Identical visual style to GlassCard (same corner radius, same background colour)
+ * but with a very subtle shadow so it lifts off the cards beneath it.
+ */
 @Composable
 private fun GlassMenuCard(
     modifier  : Modifier = Modifier,

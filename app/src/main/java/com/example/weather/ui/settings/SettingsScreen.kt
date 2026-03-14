@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +35,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.weather.R
 import com.example.weather.ui.theme.WeatherColors
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -48,7 +51,6 @@ fun SettingsScreen(
     val context                    = LocalContext.current
     val lifecycleOwner             = LocalLifecycleOwner.current
 
-    // Re-check exact alarm permission when returning from system settings
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) viewModel.recheckExactAlarmPermission()
@@ -57,7 +59,6 @@ fun SettingsScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // POST_NOTIFICATIONS runtime permission launcher (Android 13+)
     val notifPermLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> if (granted) viewModel.toggleNotifications() }
@@ -106,15 +107,22 @@ fun SettingsScreen(
             // ── Top bar ───────────────────────────────────────────────────────
             Row(
                 modifier          = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp) // Fixed RTL spacing
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                        tint = WeatherColors.TextPrimary)
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = stringResource(R.string.settings_back),
+                        tint = WeatherColors.TextPrimary
+                    )
                 }
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.settings_title), color = WeatherColors.TextPrimary,
-                    fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                Text(
+                    stringResource(R.string.settings_title),
+                    color = WeatherColors.TextPrimary,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
 
             Spacer(Modifier.height(8.dp))
@@ -201,7 +209,6 @@ fun SettingsScreen(
         }
     }
 
-    // ── Time picker dialogs ───────────────────────────────────────────────────
     if (showNotifTimePicker) {
         WeatherTimePicker(
             title         = stringResource(R.string.settings_notif_pick_time),
@@ -221,10 +228,6 @@ fun SettingsScreen(
         )
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared sub-composables
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun SectionLabel(text: String) {
@@ -251,7 +254,6 @@ private fun SettingsDivider() {
         modifier = Modifier.padding(horizontal = 20.dp))
 }
 
-/** Toggle row — enable / disable switch with title + description. */
 @Composable
 private fun ToggleRow(
     title      : String,
@@ -286,7 +288,6 @@ private fun ToggleRow(
     }
 }
 
-/** Amber banner shown when exact alarm permission is not granted on Android 12+. */
 @Composable
 private fun PermissionBannerRow(onGrant: () -> Unit) {
     SettingsDivider()
@@ -313,7 +314,6 @@ private fun PermissionBannerRow(onGrant: () -> Unit) {
     }
 }
 
-/** Tappable row that shows the current time and opens the time picker. */
 @Composable
 private fun TimeRow(
     title      : String,
@@ -322,6 +322,10 @@ private fun TimeRow(
     minute     : Int,
     onClick    : () -> Unit
 ) {
+    // Localization Fix: Use the current locale for time formatting
+    val configuration = LocalConfiguration.current
+    val locale = configuration.locales[0] ?: Locale.getDefault()
+
     Row(
         modifier              = Modifier
             .fillMaxWidth()
@@ -343,8 +347,12 @@ private fun TimeRow(
                 .padding(horizontal = 14.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("%02d:%02d".format(hour, minute), color = WeatherColors.TextPrimary,
-                fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                String.format(locale, "%02d:%02d", hour, minute), // Fixed locale formatting
+                color = WeatherColors.TextPrimary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
@@ -398,44 +406,59 @@ private fun WeatherTimePicker(
         initialMinute = initialMinute,
         is24Hour      = true
     )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor   = WeatherColors.CardBgDark,
-        tonalElevation   = 0.dp,
-        shape            = RoundedCornerShape(20.dp),
-        title = {
-            Text(title, color = WeatherColors.TextPrimary, fontSize = 16.sp,
-                fontWeight = FontWeight.Medium)
-        },
-        text = {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                TimePicker(
-                    state  = state,
-                    colors = TimePickerDefaults.colors(
-                        clockDialColor                      = WeatherColors.CardBg,
-                        clockDialSelectedContentColor       = WeatherColors.TextPrimary,
-                        clockDialUnselectedContentColor     = WeatherColors.TextSecondary,
-                        selectorColor                       = WeatherColors.TextPrimary.copy(alpha = 0.7f),
-                        containerColor                      = WeatherColors.CardBgDark,
-                        periodSelectorBorderColor           = WeatherColors.Divider,
-                        timeSelectorSelectedContainerColor  = WeatherColors.TextPrimary.copy(alpha = 0.2f),
-                        timeSelectorUnselectedContainerColor= WeatherColors.CardBg,
-                        timeSelectorSelectedContentColor    = WeatherColors.TextPrimary,
-                        timeSelectorUnselectedContentColor  = WeatherColors.TextSecondary
+    // AlertDialog uses a Popup internally and loses CompositionLocals.
+    // Capture and re-provide the localized context so stringResource() inside
+    // the dialog still resolves strings in the user's chosen language.
+    val configuration   = LocalConfiguration.current
+    val layoutDirection = LocalLayoutDirection.current
+    val baseContext     = LocalContext.current
+    val localizedContext = remember(configuration) {
+        baseContext.createConfigurationContext(configuration)
+    }
+    CompositionLocalProvider(
+        LocalContext        provides localizedContext,
+        LocalConfiguration provides configuration,
+        LocalLayoutDirection provides layoutDirection
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            containerColor   = WeatherColors.CardBgDark,
+            tonalElevation   = 0.dp,
+            shape            = RoundedCornerShape(20.dp),
+            title = {
+                Text(title, color = WeatherColors.TextPrimary, fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium)
+            },
+            text = {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    TimePicker(
+                        state  = state,
+                        colors = TimePickerDefaults.colors(
+                            clockDialColor                      = WeatherColors.CardBg,
+                            clockDialSelectedContentColor       = WeatherColors.TextPrimary,
+                            clockDialUnselectedContentColor     = WeatherColors.TextSecondary,
+                            selectorColor                       = WeatherColors.TextPrimary.copy(alpha = 0.7f),
+                            containerColor                      = WeatherColors.CardBgDark,
+                            periodSelectorBorderColor           = WeatherColors.Divider,
+                            timeSelectorSelectedContainerColor  = WeatherColors.TextPrimary.copy(alpha = 0.2f),
+                            timeSelectorUnselectedContainerColor= WeatherColors.CardBg,
+                            timeSelectorSelectedContentColor    = WeatherColors.TextPrimary,
+                            timeSelectorUnselectedContentColor  = WeatherColors.TextSecondary
+                        )
                     )
-                )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
+                    Text(stringResource(R.string.settings_ok), color = WeatherColors.TextPrimary,
+                        fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_cancel), color = WeatherColors.TextSecondary)
+                }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
-                Text(stringResource(R.string.settings_ok), color = WeatherColors.TextPrimary,
-                    fontWeight = FontWeight.SemiBold)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.settings_cancel), color = WeatherColors.TextSecondary)
-            }
-        }
-    )
+        )
+    } // end CompositionLocalProvider
 }

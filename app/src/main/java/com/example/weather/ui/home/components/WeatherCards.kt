@@ -52,13 +52,14 @@ fun CardHeader(iconRes: Int, title: String) {
             painter = painterResource(id = iconRes),
             contentDescription = null,
             tint = WeatherColors.TextSecondary,
-            modifier = Modifier.size(15.dp)
+            modifier = Modifier.size(16.dp)
         )
-        Spacer(modifier = Modifier.width(5.dp))
+        Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = title,
+            text = title.uppercase(),
             color = WeatherColors.TextSecondary,
-            fontSize = 12.sp
+            fontSize = 12.sp,
+            letterSpacing = 0.5.sp
         )
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,7 +40,7 @@ import com.example.weather.ui.home.HomeUiState
 import com.example.weather.ui.home.HomeViewModel
 import com.example.weather.ui.settings.SettingsScreen
 import com.example.weather.ui.settings.SettingsViewModel
-import com.example.weather.data.local.UserPreferencesDataSource
+import com.example.weather.ui.home.CityPagerViewModel
 import com.example.weather.ui.theme.WeatherColors
 import com.example.weather.ui.theme.WeatherTheme
 import kotlinx.coroutines.flow.first
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Extend content behind both status bar and nav bar so the gradient fills edge-to-edge
+        // Extend content behind status bar and nav bar for edge-to-edge gradient
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         val apiKey           = BuildConfig.WEATHER_API_KEY
@@ -63,34 +64,47 @@ class MainActivity : ComponentActivity() {
         val repository       = WeatherRepositoryImpl(dataSource, localSource)
         val locationProvider = LocationProviderImpl(applicationContext)
 
-        // Read initial saved language before first frame — keeps startup locale correct
+        // Cities Database (Room)
+        val cityDao = com.example.weather.data.local.cities.CityDatabase
+            .getInstance(applicationContext).cityDao()
+        val cityRepository = com.example.weather.data.local.cities.CityRepository(
+            dao         = cityDao,
+            remote      = dataSource,
+            weatherRepo = repository,
+            apiKey      = apiKey
+        )
+
+        // Read initial language preference to prevent UI flickering on launch
         val initialLanguage = runBlocking { prefsDataSource.userPreferences.first().language }
 
-        // No contextProvider lambda needed — we no longer use WeatherStringProvider
         homeFactory = HomeViewModel.Factory(
             repository       = repository,
             locationProvider = locationProvider,
             prefsDataSource  = prefsDataSource
         )
-        // settingsFactory is built inside AppRoot where HomeViewModel is accessible,
-        // so we only need prefsDataSource here — see AppRoot below.
 
         setContent {
-            // 'language' state drives locale — changing it recomposes everything below.
-            // NO Activity.recreate() → NO black bar flash.
+            // State-driven language changes trigger immediate recomposition
             var language by remember { mutableStateOf(initialLanguage) }
 
-            // Build a Configuration carrying the chosen locale for stringResource() to use
+            // The correct way to make stringResource() return localized strings is to
+            // update the Activity's own Resources configuration. This avoids overriding
+            // LocalContext (which breaks AndroidView, map, and other view-based components).
             val localizedConfig = remember(language) {
                 val locale = Locale(language)
                 Locale.setDefault(locale)
-                Configuration(resources.configuration).also { it.setLocale(locale) }
+                val config = Configuration(resources.configuration).also { it.setLocale(locale) }
+                // Apply locale directly to the Activity's resources so that
+                // stringResource() — which calls LocalContext.getString() — resolves
+                // strings in the correct language without any LocalContext override.
+                @Suppress("DEPRECATION")
+                resources.updateConfiguration(config, resources.displayMetrics)
+                config
             }
 
             CompositionLocalProvider(
                 LocalConfiguration   provides localizedConfig,
-                LocalLayoutDirection provides if (language == "ar") LayoutDirection.Rtl
-                else LayoutDirection.Ltr
+                LocalLayoutDirection provides if (language == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
             ) {
                 WeatherTheme {
                     Box(
@@ -108,7 +122,9 @@ class MainActivity : ComponentActivity() {
                         AppRoot(
                             homeFactory      = homeFactory,
                             prefsDataSource  = prefsDataSource,
-                            appContext        = applicationContext,
+                            appContext       = applicationContext,
+                            cityRepository   = cityRepository,
+                            locationProvider = locationProvider,
                             onLanguageChange = { newLang -> language = newLang }
                         )
                     }
@@ -118,20 +134,19 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 @Composable
 private fun AppRoot(
-    homeFactory    : HomeViewModel.Factory,
-    prefsDataSource: com.example.weather.data.local.UserPreferencesDataSource,
-    appContext     : android.content.Context,
+    homeFactory     : HomeViewModel.Factory,
+    prefsDataSource : com.example.weather.data.local.UserPreferencesDataSource,
+    appContext      : android.content.Context,
+    cityRepository  : com.example.weather.data.local.cities.CityRepository,
+    locationProvider: com.example.weather.location.LocationProvider,
     onLanguageChange: (String) -> Unit
 ) {
-    // HomeViewModel lives here so both WeatherRoot and SettingsScreen share the same instance.
     val homeViewModel: HomeViewModel = viewModel(factory = homeFactory)
     var showSettings  by remember { mutableStateOf(false) }
+    var showCities    by remember { mutableStateOf(false) }
 
-    // Build settingsFactory once; recreate only when homeViewModel identity changes (it won't).
     val settingsFactory = remember(homeViewModel) {
         SettingsViewModel.Factory(
             prefsDataSource   = prefsDataSource,
@@ -141,109 +156,205 @@ private fun AppRoot(
         )
     }
 
-    if (showSettings) {
-        val settingsViewModel: SettingsViewModel = viewModel(factory = settingsFactory)
-        SettingsScreen(
-            viewModel        = settingsViewModel,
-            onBack           = { showSettings = false },
-            onLanguageChange = onLanguageChange
+    val citiesFactory = remember {
+        com.example.weather.ui.cities.CitiesViewModel.Factory(
+            cityRepo    = cityRepository,
+            prefsSource = prefsDataSource
         )
-    } else {
-        WeatherRoot(
-            viewModel       = homeViewModel,
-            onSettingsClick = { showSettings = true }
+    }
+
+    val pagerFactory = remember {
+        CityPagerViewModel.Factory(
+            cityRepository   = cityRepository,
+            prefsSource      = prefsDataSource,
+            locationProvider = locationProvider
         )
+    }
+
+    val citiesViewModel: com.example.weather.ui.cities.CitiesViewModel =
+        viewModel(factory = citiesFactory)
+
+    val pagerViewModel: CityPagerViewModel =
+        viewModel(factory = pagerFactory)
+
+    when {
+        showSettings -> {
+            val settingsViewModel: SettingsViewModel = viewModel(factory = settingsFactory)
+            SettingsScreen(
+                viewModel        = settingsViewModel,
+                onBack           = { showSettings = false },
+                onLanguageChange = onLanguageChange
+            )
+        }
+        showCities -> {
+            com.example.weather.ui.cities.ManageCitiesScreen(
+                viewModel    = citiesViewModel,
+                onBack       = { showCities = false },
+                onOpenCity   = { city ->
+                    val idx = pagerViewModel.pages.value.indexOfFirst { it.id == city.id }
+                    if (idx >= 0) pagerViewModel.onPageSelected(idx)
+                    showCities = false
+                },
+                onSetDefault = { city ->
+                    val idx = pagerViewModel.pages.value.indexOfFirst { it.id == city.id }
+                    if (idx >= 0) pagerViewModel.onPageSelected(idx)
+                    showCities = false
+                }
+            )
+        }
+        else -> {
+            WeatherRoot(
+                homeViewModel   = homeViewModel,
+                pagerViewModel  = pagerViewModel,
+                cityRepository  = cityRepository,
+                onSettingsClick = { showSettings = true },
+                onCitiesClick   = { showCities = true }
+            )
+        }
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun WeatherRoot(
-    viewModel      : HomeViewModel,
-    onSettingsClick: () -> Unit
+    homeViewModel   : HomeViewModel,
+    pagerViewModel  : CityPagerViewModel,
+    cityRepository  : com.example.weather.data.local.cities.CityRepository,
+    onSettingsClick : () -> Unit,
+    onCitiesClick   : () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-
-    val uiState      by viewModel.uiState.collectAsState()
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val units        by viewModel.units.collectAsState()
-
+    val pages   by pagerViewModel.pages.collectAsState()
+    val states  by pagerViewModel.states.collectAsState()
+    val units   by homeViewModel.units.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
                 || permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-        if (granted) viewModel.onLocationPermissionGranted()
-        else         viewModel.onLocationPermissionDenied()
+        if (granted) {
+            homeViewModel.onLocationPermissionGranted()
+            pagerViewModel.refreshAll()
+        } else {
+            homeViewModel.onLocationPermissionDenied()
+        }
     }
 
+    var startupDone by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        val granted =
-            ContextCompat.checkSelfPermission(
-                context, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(
-                        context, Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
-        if (granted) viewModel.onLocationPermissionGranted()
-        else permissionLauncher.launch(
-            arrayOf(
+        if (startupDone) return@LaunchedEffect
+        startupDone = true
+        val granted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            homeViewModel.onLocationPermissionGranted()
+            pagerViewModel.refreshAll()
+        } else {
+            permissionLauncher.launch(arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
+                Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
     }
 
-    when (val state = uiState) {
-        is HomeUiState.Loading -> LoadingScreen()
-        is HomeUiState.Error   -> ErrorScreen(
-            message = state.message,
-            onRetry = {
+    if (pages.isEmpty()) {
+        val uiState by homeViewModel.uiState.collectAsState()
+        when (val state = uiState) {
+            is HomeUiState.Loading -> LoadingScreen()
+            is HomeUiState.Error   -> ErrorScreen(state.message) {
                 val granted = ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-                if (granted) viewModel.onLocationPermissionGranted()
-                else permissionLauncher.launch(
-                    arrayOf(
+                    context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                if (granted) {
+                    homeViewModel.onLocationPermissionGranted()
+                    pagerViewModel.refreshAll()
+                } else {
+                    permissionLauncher.launch(arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
+                        Manifest.permission.ACCESS_COARSE_LOCATION))
+                }
+            }
+            is HomeUiState.Success -> HomeScreen(
+                cityName = state.cityName, countryCode = state.countryCode,
+                currentTemp = state.currentTemp, unitSymbol = state.unitSymbol,
+                highTemp = state.highTemp, lowTemp = state.lowTemp,
+                weatherDescription = state.weatherDescription, feelsLike = state.feelsLike,
+                actualTemp = state.actualTemp, feelsLikeRaw = state.feelsLikeRaw,
+                actualTempRaw = state.actualTempRaw, uvIndex = state.uvIndex,
+                windSpeedBft = state.windSpeedBft, windDeg = state.windDeg,
+                humidity = state.humidity, visibilityKm = state.visibilityKm,
+                pressure = state.pressure, sunriseTime = state.sunriseTime,
+                sunsetTime = state.sunsetTime, moonPhaseRaw = state.moonPhaseRaw,
+                hourlyItems = state.hourlyItems, dailyItems = state.dailyItems,
+                isRefreshing = false, isFromCache = state.isFromCache,
+                cachedAtEpochMs = state.cachedAtEpochMs, units = units,
+                onRefresh = { homeViewModel.refresh() },
+                onUnitsToggle = { homeViewModel.toggleUnits() },
+                onSettingsClick = onSettingsClick, onMenuClick = onCitiesClick
+            )
+        }
+        return
+    }
+
+    val pagerState = androidx.compose.foundation.pager.rememberPagerState(
+        initialPage    = 0,
+        pageCount      = { pages.size }
+    )
+
+    LaunchedEffect(pagerState.currentPage) {
+        pagerViewModel.onPageSelected(pagerState.currentPage)
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        androidx.compose.foundation.pager.HorizontalPager(
+            state    = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { pageIndex ->
+            val entity   = pages.getOrNull(pageIndex)
+            val pageState = entity?.let { states[it.id] } ?: HomeUiState.Loading
+
+            when (val state = pageState) {
+                is HomeUiState.Loading -> LoadingScreen()
+                is HomeUiState.Error   -> ErrorScreen(state.message) {
+                    entity?.let { pagerViewModel.refreshPage(it.id) }
+                }
+                is HomeUiState.Success -> HomeScreen(
+                    cityName              = state.cityName,
+                    countryCode           = state.countryCode,
+                    currentTemp           = state.currentTemp,
+                    unitSymbol            = state.unitSymbol,
+                    highTemp              = state.highTemp,
+                    lowTemp               = state.lowTemp,
+                    weatherDescription    = state.weatherDescription,
+                    feelsLike             = state.feelsLike,
+                    actualTemp            = state.actualTemp,
+                    feelsLikeRaw          = state.feelsLikeRaw,
+                    actualTempRaw         = state.actualTempRaw,
+                    uvIndex               = state.uvIndex,
+                    windSpeedBft          = state.windSpeedBft,
+                    windDeg               = state.windDeg,
+                    humidity              = state.humidity,
+                    visibilityKm          = state.visibilityKm,
+                    pressure              = state.pressure,
+                    sunriseTime           = state.sunriseTime,
+                    sunsetTime            = state.sunsetTime,
+                    moonPhaseRaw          = state.moonPhaseRaw,
+                    hourlyItems           = state.hourlyItems,
+                    dailyItems            = state.dailyItems,
+                    isRefreshing          = false,
+                    isFromCache           = state.isFromCache,
+                    cachedAtEpochMs       = state.cachedAtEpochMs,
+                    units                 = units,
+                    pageCount             = pages.size,
+                    currentPage           = pageIndex,
+                    onRefresh             = { entity?.let { pagerViewModel.refreshPage(it.id) } },
+                    onUnitsToggle         = { homeViewModel.toggleUnits(); pagerViewModel.refreshAll() },
+                    onSettingsClick       = onSettingsClick,
+                    onMenuClick           = onCitiesClick
                 )
             }
-        )
-        is HomeUiState.Success -> HomeScreen(
-            cityName              = state.cityName,
-            countryCode           = state.countryCode,
-            currentTemp           = state.currentTemp,
-            unitSymbol            = state.unitSymbol,
-            highTemp              = state.highTemp,
-            lowTemp               = state.lowTemp,
-            weatherDescription    = state.weatherDescription,
-            feelsLike             = state.feelsLike,
-            actualTemp            = state.actualTemp,
-            feelsLikeRaw          = state.feelsLikeRaw,
-            actualTempRaw         = state.actualTempRaw,
-            uvIndex               = state.uvIndex,
-            windSpeedBft          = state.windSpeedBft,
-            windDeg               = state.windDeg,
-            humidity              = state.humidity,
-            visibilityKm          = state.visibilityKm,
-            pressure              = state.pressure,
-            sunriseTime           = state.sunriseTime,
-            sunsetTime            = state.sunsetTime,
-            moonPhaseRaw          = state.moonPhaseRaw,
-            hourlyItems           = state.hourlyItems,
-            dailyItems            = state.dailyItems,
-            isRefreshing          = isRefreshing,
-            isFromCache           = state.isFromCache,
-            cachedAtEpochMs       = state.cachedAtEpochMs,
-            units                 = units,
-            onRefresh             = { viewModel.refresh() },
-            onUnitsToggle         = { viewModel.toggleUnits() },
-            onSettingsClick       = onSettingsClick
-        )
+        }
     }
 }
 

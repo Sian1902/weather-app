@@ -6,15 +6,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weather.R
 import com.example.weather.ui.theme.WeatherColors
 
-/**
- * Humidity card.
- * Resolves its own description from strings.xml via stringResource().
- */
 @Composable
 fun HumidityCard(
     humidity : Int,
@@ -30,7 +27,10 @@ fun HumidityCard(
     }
 
     DetailCard(modifier = modifier, minHeight = 160.dp) {
-        CardHeader(iconRes = R.drawable.ic_humidity, title = stringResource(R.string.card_humidity))
+        CardHeader(
+            iconRes = R.drawable.ic_humidity,
+            title = stringResource(R.string.card_humidity)
+        )
         Spacer(Modifier.height(8.dp))
         Text(
             text       = "$humidity%",
@@ -39,6 +39,12 @@ fun HumidityCard(
             fontWeight = FontWeight.Light
         )
         Spacer(Modifier.weight(1f))
-        Text(text = description, color = WeatherColors.TextSecondary, fontSize = 11.sp)
+        Text(
+            text     = description,
+            color    = WeatherColors.TextSecondary,
+            fontSize = 11.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

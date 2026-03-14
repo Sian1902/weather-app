@@ -28,12 +28,12 @@ fun ForecastCard(
             .padding(horizontal = 12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header: Adjusted for RTL (Icons on left, Title/Icon on right)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Actions (Icons) - Arrangement.SpaceBetween handles RTL flip
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_chart_view),
@@ -48,6 +48,7 @@ fun ForecastCard(
                         modifier = Modifier.size(20.dp)
                     )
                 }
+                // Title and Icon
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(R.string.weather_forecast),
@@ -76,13 +77,14 @@ fun ForecastCard(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            // Ensure numeric filtering works for localized digits if necessary
             SparkLine(
-                values = items.map { it.high.filter { char -> char.isDigit() || char == '-' }.toFloat() },
+                values = items.map { it.high.replace(Regex("[^0-9-]"), "").toFloatOrNull() ?: 0f },
                 color  = WeatherColors.SparkHigh
             )
             Spacer(modifier = Modifier.height(4.dp))
             SparkLine(
-                values = items.map { it.low.filter { char -> char.isDigit() || char == '-' }.toFloat() },
+                values = items.map { it.low.replace(Regex("[^0-9-]"), "").toFloatOrNull() ?: 0f },
                 color  = WeatherColors.SparkLow
             )
 
@@ -108,7 +110,6 @@ fun ForecastCard(
 
 @Composable
 private fun DailyItemView(item: DailyItem, modifier: Modifier = Modifier) {
-    // Map the English string from the API to a localized resource
     val dayLabel = when (item.day.uppercase()) {
         "TODAY" -> stringResource(R.string.day_today)
         "MON"   -> stringResource(R.string.day_monday)
@@ -118,7 +119,7 @@ private fun DailyItemView(item: DailyItem, modifier: Modifier = Modifier) {
         "FRI"   -> stringResource(R.string.day_friday)
         "SAT"   -> stringResource(R.string.day_saturday)
         "SUN"   -> stringResource(R.string.day_sunday)
-        else    -> item.day // Fallback
+        else    -> item.day
     }
 
     Column(
@@ -130,12 +131,14 @@ private fun DailyItemView(item: DailyItem, modifier: Modifier = Modifier) {
             text       = dayLabel,
             color      = WeatherColors.TextPrimary,
             fontSize   = 13.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            maxLines   = 1
         )
         Text(
             text     = item.date,
             color    = WeatherColors.TextSecondary,
-            fontSize = 11.sp
+            fontSize = 11.sp,
+            maxLines = 1
         )
         AsyncImage(
             model              = "https://openweathermap.org/img/wn/${item.iconCode}@2x.png",

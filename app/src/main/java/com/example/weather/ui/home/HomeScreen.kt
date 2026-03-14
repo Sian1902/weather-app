@@ -9,11 +9,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,6 +55,8 @@ fun HomeScreen(
     isRefreshing           : Boolean = false,
     isFromCache            : Boolean = false,
     cachedAtEpochMs        : Long    = 0L,
+    pageCount              : Int     = 1,
+    currentPage            : Int     = 0,
     onRefresh              : () -> Unit = {},
     onUnitsToggle          : () -> Unit = {},
     onSettingsClick        : () -> Unit = {},
@@ -89,11 +93,12 @@ fun HomeScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            // TopBar owns its own glass popup menu — no ModalBottomSheet needed here
             TopBar(
                 cityName        = cityName,
                 countryCode     = countryCode,
                 units           = units,
+                pageCount       = pageCount,
+                currentPage     = currentPage,
                 onUnitsToggle   = onUnitsToggle,
                 onSettingsClick = onSettingsClick,
                 onMenuClick     = onMenuClick
@@ -101,7 +106,13 @@ fun HomeScreen(
 
             if (isFromCache) CacheBanner(cachedAtEpochMs = cachedAtEpochMs)
 
-            HeroSection(currentTemp, unitSymbol, highTemp, lowTemp)
+            HeroSection(
+                temp        = currentTemp,
+                unit        = unitSymbol,
+                high        = highTemp,
+                low         = lowTemp,
+                description = weatherDescription
+            )
 
             Spacer(Modifier.height(24.dp))
             HourlyWeatherCard(items = hourlyItems)
@@ -138,9 +149,14 @@ fun HomeScreen(
 
 @Composable
 private fun CacheBanner(cachedAtEpochMs: Long) {
-    val timeStr = androidx.compose.runtime.remember(cachedAtEpochMs) {
-        if (cachedAtEpochMs == 0L) "recently"
-        else SimpleDateFormat("HH:mm, MMM d", Locale.getDefault()).format(Date(cachedAtEpochMs))
+    // Use the composition locale so the date format respects the user's chosen language
+    val configuration = LocalConfiguration.current
+    val locale        = configuration.locales[0] ?: Locale.getDefault()
+    val recentlyLabel = stringResource(R.string.cache_recently)
+
+    val timeStr = remember(cachedAtEpochMs, locale) {
+        if (cachedAtEpochMs == 0L) recentlyLabel
+        else SimpleDateFormat("HH:mm, MMM d", locale).format(Date(cachedAtEpochMs))
     }
     Box(
         modifier         = Modifier
