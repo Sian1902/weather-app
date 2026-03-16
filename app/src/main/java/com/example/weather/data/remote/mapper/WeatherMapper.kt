@@ -21,7 +21,6 @@ object WeatherMapper {
         val currentTemp = current.main.temp.roundToInt().toString()
         val feelsLike = current.main.feelsLike.roundToInt().toString()
 
-        // weatherDescription: from API, already in the correct language
         val description =
             current.weather.firstOrNull()?.description?.replaceFirstChar { it.uppercase() } ?: ""
 
@@ -93,7 +92,7 @@ object WeatherMapper {
                 timeInMillis = (items.first().dt + tzOffsetSeconds) * 1000L
             }
             DailyItem(
-                day = if (index == 0) "TODAY"  // ForecastCard swaps for R.string.day_today
+                day = if (index == 0) "TODAY"
                 else dayFmt.format(cal.time),
                 date = dateFmt.format(cal.time),
                 iconCode = items.groupingBy { it.weather.firstOrNull()?.icon ?: "01d" }.eachCount()

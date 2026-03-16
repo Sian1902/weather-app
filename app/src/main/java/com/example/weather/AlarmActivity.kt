@@ -31,9 +31,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weather.ui.theme.WeatherColors
 import com.example.weather.data.local.worker.AlarmDismissReceiver
 import com.example.weather.data.local.worker.AlarmSoundManager
+import com.example.weather.ui.theme.WeatherColors
 
 class AlarmActivity : ComponentActivity() {
 
@@ -89,7 +89,6 @@ class AlarmActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     modifier = Modifier.padding(32.dp)
                 ) {
-                    // Time
                     val time = remember {
                         val cal = java.util.Calendar.getInstance()
                         "%02d:%02d".format(

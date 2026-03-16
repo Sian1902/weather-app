@@ -3,8 +3,8 @@ package com.example.weather.ui.cities
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.weather.data.local.prefs.UserPreferencesDataSource
 import com.example.weather.data.local.cities.CityEntity
+import com.example.weather.data.local.prefs.UserPreferencesDataSource
 import com.example.weather.data.repository.CityRepository
 import com.example.weather.data.repository.WeatherSnapshot
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,8 +42,7 @@ class CitiesViewModel(
                         _items.update { list ->
                             list.map { item ->
                                 if (item.entity.id == entity.id) item.copy(
-                                    snapshot = snapshot,
-                                    loading = false
+                                    snapshot = snapshot, loading = false
                                 )
                                 else item
                             }
@@ -67,15 +66,13 @@ class CitiesViewModel(
     }
 
 
-
     class Factory(
         private val cityRepo: CityRepository, private val prefsSource: UserPreferencesDataSource
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(CitiesViewModel::class.java)) return CitiesViewModel(
-                cityRepo,
-                prefsSource
+                cityRepo, prefsSource
             ) as T
             throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }

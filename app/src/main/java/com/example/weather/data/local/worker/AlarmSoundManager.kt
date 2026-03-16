@@ -12,10 +12,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.annotation.RequiresPermission
 
-/**
- * Singleton that owns the looping MediaPlayer and Vibrator for the alarm.
- * Kept as an object so both AlarmActivity and AlarmDismissReceiver can stop it.
- */
+
 object AlarmSoundManager {
 
     private var mediaPlayer: MediaPlayer? = null
@@ -23,18 +20,16 @@ object AlarmSoundManager {
 
     @RequiresPermission(Manifest.permission.VIBRATE)
     fun start(context: Context) {
-        if (mediaPlayer?.isPlaying == true) return   // already playing
+        if (mediaPlayer?.isPlaying == true) return
 
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
 
         mediaPlayer = MediaPlayer().apply {
             setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
+                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setLegacyStreamType(AudioManager.STREAM_ALARM)
-                    .build()
+                    .setLegacyStreamType(AudioManager.STREAM_ALARM).build()
             )
             setDataSource(context, alarmUri)
             isLooping = true
@@ -44,8 +39,7 @@ object AlarmSoundManager {
 
 
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager)
-                .defaultVibrator
+            (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
         } else {
             context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
@@ -54,8 +48,7 @@ object AlarmSoundManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator?.vibrate(VibrationEffect.createWaveform(pattern, 0))
         } else {
-            @Suppress("DEPRECATION")
-            vibrator?.vibrate(pattern, 0)
+            @Suppress("DEPRECATION") vibrator?.vibrate(pattern, 0)
         }
     }
 

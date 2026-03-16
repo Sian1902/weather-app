@@ -27,10 +27,7 @@ object TestFixtures {
     )
 
     val weatherDescDto = WeatherDescriptionDto(
-        id = 800,
-        main = "Clear",
-        description = "clear sky",
-        icon = "01d"
+        id = 800, main = "Clear", description = "clear sky", icon = "01d"
     )
 
     val sysDto = SysDto(country = "EG", sunrise = 1_700_000_000L, sunset = 1_700_043_200L)
@@ -62,8 +59,7 @@ object TestFixtures {
     )
 
     val forecastResponseDto = ForecastResponseDto(
-        list = listOf(forecastItemDto),
-        city = CityDto(
+        list = listOf(forecastItemDto), city = CityDto(
             id = 360630,
             name = "Cairo",
             coord = CoordDto(lon = 31.23, lat = 30.06),
@@ -74,17 +70,17 @@ object TestFixtures {
         )
     )
 
-    val liveResult   = WeatherResult.Live(currentWeatherDto, forecastResponseDto)
+    val liveResult = WeatherResult.Live(currentWeatherDto, forecastResponseDto)
     val cachedResult = WeatherResult.Cached(currentWeatherDto, forecastResponseDto, 1_700_000_000L)
 
 
     fun cityEntity(
-        id                : Int     = 1,
-        name              : String  = "Cairo",
-        lat               : Double  = 30.06,
-        lon               : Double  = 31.23,
-        isDefault         : Boolean = false,
-        isCurrentLocation : Boolean = false
+        id: Int = 1,
+        name: String = "Cairo",
+        lat: Double = 30.06,
+        lon: Double = 31.23,
+        isDefault: Boolean = false,
+        isCurrentLocation: Boolean = false
     ) = CityEntity(
         id = id,
         name = name,

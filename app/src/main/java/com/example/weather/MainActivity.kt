@@ -40,11 +40,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.weather.data.local.prefs.UserPreferencesDataSourceImpl
 import com.example.weather.data.local.WeatherLocalDataSourceImpl
 import com.example.weather.data.local.prefs.UserPreferencesDataSource
-import com.example.weather.data.remote.api.RetrofitClient
+import com.example.weather.data.local.prefs.UserPreferencesDataSourceImpl
 import com.example.weather.data.remote.WeatherRemoteDataSourceImpl
+import com.example.weather.data.remote.api.RetrofitClient
 import com.example.weather.data.repository.CityRepository
 import com.example.weather.data.repository.WeatherRepositoryImpl
 import com.example.weather.location.LocationProviderImpl
@@ -99,8 +99,7 @@ class MainActivity : ComponentActivity() {
                 Locale.setDefault(locale)
                 val config = Configuration(resources.configuration).also { it.setLocale(locale) }
                 @Suppress("DEPRECATION") resources.updateConfiguration(
-                    config,
-                    resources.displayMetrics
+                    config, resources.displayMetrics
                 )
                 config
             }

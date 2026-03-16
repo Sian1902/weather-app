@@ -2,9 +2,9 @@ package com.example.weather.data.repository
 
 import com.example.weather.data.local.WeatherCacheModel
 import com.example.weather.data.local.WeatherLocalDataSource
+import com.example.weather.data.remote.WeatherRemoteDataSource
 import com.example.weather.data.remote.dto.CurrentWeatherDto
 import com.example.weather.data.remote.dto.ForecastResponseDto
-import com.example.weather.data.remote.WeatherRemoteDataSource
 import com.google.gson.Gson
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

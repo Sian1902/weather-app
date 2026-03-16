@@ -212,9 +212,11 @@ private fun CityCard(
             Spacer(Modifier.width(8.dp))
         }
 
-        Column(modifier = Modifier
-            .weight(1f)
-            .padding(end = 8.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+        ) {
             Text(
                 text = item.entity.name,
                 color = WeatherColors.TextPrimary,

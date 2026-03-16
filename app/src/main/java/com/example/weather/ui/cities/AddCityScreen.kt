@@ -133,7 +133,8 @@ fun AddCityScreen(
             ) {
                 IconButton(onClick = onBack) {
                     Icon(
-                        Icons.Default.ArrowBack, contentDescription = null,
+                        Icons.Default.ArrowBack,
+                        contentDescription = null,
                         tint = WeatherColors.TextPrimary
                     )
                 }
@@ -239,10 +240,7 @@ fun AddCityScreen(
                             position = point
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                             title = selectedName ?: String.format(
-                                Locale.getDefault(),
-                                "%.4f, %.4f",
-                                point.latitude,
-                                point.longitude
+                                Locale.getDefault(), "%.4f, %.4f", point.latitude, point.longitude
                             )
                             mapView.overlays.add(this)
                             mapView.controller.animateTo(point)
@@ -283,16 +281,11 @@ fun AddCityScreen(
                         onClick = {
                             val pt = selectedPoint ?: return@Button
                             val name = selectedName ?: String.format(
-                                Locale.getDefault(),
-                                "%.4f, %.4f",
-                                pt.latitude,
-                                pt.longitude
+                                Locale.getDefault(), "%.4f, %.4f", pt.latitude, pt.longitude
                             )
                             onConfirm(
                                 CityEntity(
-                                    name = name,
-                                    lat = pt.latitude,
-                                    lon = pt.longitude
+                                    name = name, lat = pt.latitude, lon = pt.longitude
                                 )
                             )
                         },
