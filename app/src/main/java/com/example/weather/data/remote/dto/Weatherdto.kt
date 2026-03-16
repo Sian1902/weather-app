@@ -1,6 +1,7 @@
-package com.example.weather.data.remote
+package com.example.weather.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
+
 data class CurrentWeatherDto(
     @SerializedName("coord") val coord: CoordDto,
     @SerializedName("weather") val weather: List<WeatherDescriptionDto>,
@@ -27,15 +28,14 @@ data class ForecastItemDto(
     @SerializedName("clouds") val clouds: CloudsDto,
     @SerializedName("wind") val wind: WindDto,
     @SerializedName("visibility") val visibility: Int,
-    @SerializedName("pop") val pop: Double,          // Probability of precipitation
+    @SerializedName("pop") val pop: Double,
     @SerializedName("rain") val rain: RainDto?,
     @SerializedName("snow") val snow: SnowDto?,
     @SerializedName("dt_txt") val dtTxt: String
 )
 
 data class CoordDto(
-    @SerializedName("lon") val lon: Double,
-    @SerializedName("lat") val lat: Double
+    @SerializedName("lon") val lon: Double, @SerializedName("lat") val lat: Double
 )
 
 data class WeatherDescriptionDto(

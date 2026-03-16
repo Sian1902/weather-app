@@ -20,15 +20,7 @@ object WeatherColors {
 
     val SparkHigh     = Color(0xFFFFC107)
     val SparkLow      = Color(0xFF4DD0E1)
-    val UvGreen       = Color(0xFF8BC34A)
-    val UvYellow      = Color(0xFFFFEB3B)
-    val UvOrange      = Color(0xFFFF9800)
-    val UvRed         = Color(0xFFF44336)
-    val UvPurple      = Color(0xFF9C27B0)
 
-    val SunDot        = Color(0xFFFFC107)
-
-    val MoonSurface   = Color(0xFFCCCCCC)
 
 
     val CloudOverlay  = Color.White.copy(alpha = 0.25f)

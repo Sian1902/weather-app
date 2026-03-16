@@ -1,5 +1,6 @@
-package com.example.weather.worker
+package com.example.weather.data.local.worker
 
+import android.R
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,9 +16,8 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.example.weather.AlarmActivity
 import com.example.weather.BuildConfig
-import com.example.weather.R
-import com.example.weather.data.local.UserPreferencesDataSourceImpl
-import com.example.weather.data.remote.RetrofitClient
+import com.example.weather.data.local.prefs.UserPreferencesDataSourceImpl
+import com.example.weather.data.remote.api.RetrofitClient
 import com.example.weather.data.remote.WeatherRemoteDataSourceImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -92,8 +92,8 @@ class WeatherAlarmReceiver : BroadcastReceiver() {
 
         val iconRes = runCatching {
             context.resources.getIdentifier("ic_notification", "drawable", context.packageName)
-                .takeIf { it != 0 } ?: android.R.drawable.ic_dialog_info
-        }.getOrDefault(android.R.drawable.ic_dialog_info)
+                .takeIf { it != 0 } ?: R.drawable.ic_dialog_info
+        }.getOrDefault(R.drawable.ic_dialog_info)
 
         // Full-screen intent — launches AlarmActivity on top of the lock screen
         val fullScreenIntent = PendingIntent.getActivity(
@@ -104,7 +104,7 @@ class WeatherAlarmReceiver : BroadcastReceiver() {
 
         // Dismiss action — fires AlarmDismissReceiver without opening the app
         val dismissAction = NotificationCompat.Action.Builder(
-            android.R.drawable.ic_delete,
+            R.drawable.ic_delete,
             "Dismiss",
             AlarmDismissReceiver.dismissPendingIntent(context)
         ).build()

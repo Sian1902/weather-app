@@ -1,17 +1,29 @@
 package com.example.weather.ui.settings
 
 import android.content.Context
-import com.example.weather.data.local.UserPreferences
-import com.example.weather.data.local.UserPreferencesDataSource
-import com.example.weather.worker.WeatherAlarmReceiver
-import com.example.weather.worker.WeatherNotificationReceiver
-import io.mockk.*
+import com.example.weather.data.local.prefs.UserPreferences
+import com.example.weather.data.local.prefs.UserPreferencesDataSource
+import com.example.weather.data.local.worker.WeatherAlarmReceiver
+import com.example.weather.data.local.worker.WeatherNotificationReceiver
+import io.mockk.Runs
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 
@@ -20,10 +32,10 @@ class SettingsViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val prefsDataSource   = mockk<UserPreferencesDataSource>()
-    private val appContext        = mockk<Context>(relaxed = true)
+    private val prefsDataSource = mockk<UserPreferencesDataSource>()
+    private val appContext = mockk<Context>(relaxed = true)
     private val onLanguageChanged = mockk<(String) -> Unit>(relaxed = true)
-    private val onUnitsToggled    = mockk<() -> Unit>(relaxed = true)
+    private val onUnitsToggled = mockk<() -> Unit>(relaxed = true)
 
     private lateinit var viewModel: SettingsViewModel
 
@@ -34,21 +46,21 @@ class SettingsViewModelTest {
         mockkObject(WeatherAlarmReceiver)
 
         coEvery { prefsDataSource.userPreferences } returns flowOf(UserPreferences())
-        coEvery { prefsDataSource.setLanguage(any()) }              just Runs
-        coEvery { prefsDataSource.setNotificationsEnabled(any()) }  just Runs
+        coEvery { prefsDataSource.setLanguage(any()) } just Runs
+        coEvery { prefsDataSource.setNotificationsEnabled(any()) } just Runs
         coEvery { prefsDataSource.setNotificationTime(any(), any()) } just Runs
-        coEvery { prefsDataSource.setAlarmEnabled(any()) }          just Runs
-        coEvery { prefsDataSource.setAlarmTime(any(), any()) }      just Runs
-        every  { WeatherNotificationReceiver.scheduleDaily(any(), any(), any()) } returns true
-        every  { WeatherNotificationReceiver.cancel(any()) }        just Runs
-        every  { WeatherAlarmReceiver.scheduleDaily(any(), any(), any()) } returns true
-        every  { WeatherAlarmReceiver.cancel(any()) }               just Runs
+        coEvery { prefsDataSource.setAlarmEnabled(any()) } just Runs
+        coEvery { prefsDataSource.setAlarmTime(any(), any()) } just Runs
+        every { WeatherNotificationReceiver.scheduleDaily(any(), any(), any()) } returns true
+        every { WeatherNotificationReceiver.cancel(any()) } just Runs
+        every { WeatherAlarmReceiver.scheduleDaily(any(), any(), any()) } returns true
+        every { WeatherAlarmReceiver.cancel(any()) } just Runs
 
         viewModel = SettingsViewModel(
-            prefsDataSource   = prefsDataSource,
-            appContext        = appContext,
+            prefsDataSource = prefsDataSource,
+            appContext = appContext,
             onLanguageChanged = onLanguageChanged,
-            onUnitsToggled    = onUnitsToggled
+            onUnitsToggled = onUnitsToggled
         )
     }
 
@@ -59,18 +71,14 @@ class SettingsViewModelTest {
         unmockkObject(WeatherAlarmReceiver)
     }
 
-    // ── Test 1: setLanguage persists and calls the callback ───────────────────
-
     @Test
     fun `setLanguage persists to DataStore and invokes onLanguageChanged callback`() = runTest {
         viewModel.setLanguage("ar")
         advanceUntilIdle()
 
         coVerify { prefsDataSource.setLanguage("ar") }
-        verify   { onLanguageChanged("ar") }
+        verify { onLanguageChanged("ar") }
     }
-
-    // ── Test 2: toggleUnits delegates to the injected lambda ─────────────────
 
     @Test
     fun `toggleUnits calls the onUnitsToggled lambda`() {
@@ -78,21 +86,21 @@ class SettingsViewModelTest {
         verify(exactly = 1) { onUnitsToggled() }
     }
 
-    // ── Test 3: toggleNotifications enables and schedules the notification ────
-
     @Test
     fun `toggleNotifications enables notifications and schedules alarm`() = runTest {
-        // Arrange — notifications are off by default in UserPreferences()
         coEvery { prefsDataSource.userPreferences } returns flowOf(
-            UserPreferences(notificationsEnabled = false, notificationHour = 7, notificationMinute = 0)
+            UserPreferences(
+                notificationsEnabled = false,
+                notificationHour = 7,
+                notificationMinute = 0
+            )
         )
 
         viewModel.toggleNotifications()
         advanceUntilIdle()
 
         coVerify { prefsDataSource.setNotificationsEnabled(true) }
-        verify   { WeatherNotificationReceiver.scheduleDaily(appContext, 7, 0) }
-        // needsExactAlarmPermission should be false because scheduleDaily returned true
+        verify { WeatherNotificationReceiver.scheduleDaily(appContext, 7, 0) }
         assertFalse(viewModel.needsExactAlarmPermission.value)
     }
 }

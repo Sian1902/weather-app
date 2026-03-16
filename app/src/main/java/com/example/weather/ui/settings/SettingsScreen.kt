@@ -8,15 +8,45 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDefaults
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,17 +69,15 @@ import java.util.Locale
 
 @Composable
 fun SettingsScreen(
-    viewModel       : SettingsViewModel,
-    onBack          : () -> Unit,
-    onLanguageChange: (String) -> Unit
+    viewModel: SettingsViewModel, onBack: () -> Unit, onLanguageChange: (String) -> Unit
 ) {
-    val prefs                     by viewModel.preferences.collectAsState()
-    val needsExactNotif           by viewModel.needsExactAlarmPermission.collectAsState()
-    val needsExactAlarm           by viewModel.needsExactAlarmPermissionAlarm.collectAsState()
-    var showNotifTimePicker        by remember { mutableStateOf(false) }
-    var showAlarmTimePicker        by remember { mutableStateOf(false) }
-    val context                    = LocalContext.current
-    val lifecycleOwner             = LocalLifecycleOwner.current
+    val prefs by viewModel.preferences.collectAsState()
+    val needsExactNotif by viewModel.needsExactAlarmPermission.collectAsState()
+    val needsExactAlarm by viewModel.needsExactAlarmPermissionAlarm.collectAsState()
+    var showNotifTimePicker by remember { mutableStateOf(false) }
+    var showAlarmTimePicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -72,7 +100,9 @@ fun SettingsScreen(
             val has = ContextCompat.checkSelfPermission(
                 context, Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
-            if (!has) { notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS); return }
+            if (!has) {
+                notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS); return
+            }
         }
         viewModel.toggleNotifications()
     }
@@ -82,7 +112,9 @@ fun SettingsScreen(
             val has = ContextCompat.checkSelfPermission(
                 context, Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
-            if (!has) { alarmPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS); return }
+            if (!has) {
+                alarmPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS); return
+            }
         }
         viewModel.toggleAlarm()
     }
@@ -92,8 +124,12 @@ fun SettingsScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(WeatherColors.SkyTop, WeatherColors.SkyMid,
-                        WeatherColors.SkyDeep, WeatherColors.SkyBottom)
+                    listOf(
+                        WeatherColors.SkyTop,
+                        WeatherColors.SkyMid,
+                        WeatherColors.SkyDeep,
+                        WeatherColors.SkyBottom
+                    )
                 )
             )
     ) {
@@ -104,11 +140,12 @@ fun SettingsScreen(
                 .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
         ) {
-            // ── Top bar ───────────────────────────────────────────────────────
             Row(
-                modifier          = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // Fixed RTL spacing
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -127,81 +164,81 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // ── Language ──────────────────────────────────────────────────────
             SectionLabel(stringResource(R.string.settings_language))
             Spacer(Modifier.height(8.dp))
             SegmentedControl(
-                options  = listOf("en" to stringResource(R.string.language_english),
-                    "ar" to stringResource(R.string.language_arabic)),
+                options = listOf(
+                    "en" to stringResource(R.string.language_english),
+                    "ar" to stringResource(R.string.language_arabic)
+                ),
                 selected = prefs.language,
                 onSelect = { lang -> viewModel.setLanguage(lang); onLanguageChange(lang) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Temperature unit ──────────────────────────────────────────────
             SectionLabel(stringResource(R.string.settings_units))
             Spacer(Modifier.height(8.dp))
             SegmentedControl(
-                options  = listOf("metric"   to stringResource(R.string.units_celsius),
-                    "imperial" to stringResource(R.string.units_fahrenheit)),
+                options = listOf(
+                    "metric" to stringResource(R.string.units_celsius),
+                    "imperial" to stringResource(R.string.units_fahrenheit)
+                ),
                 selected = prefs.units,
                 onSelect = { chosen -> if (chosen != prefs.units) viewModel.toggleUnits() },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             )
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Daily Notification ────────────────────────────────────────────
             SectionLabel(stringResource(R.string.settings_notifications))
             Spacer(Modifier.height(8.dp))
             SettingsCard {
                 ToggleRow(
-                    title       = stringResource(R.string.settings_notif_daily),
+                    title = stringResource(R.string.settings_notif_daily),
                     description = stringResource(R.string.settings_notif_daily_desc),
-                    checked     = prefs.notificationsEnabled,
-                    onToggle    = { onNotificationToggle() }
-                )
+                    checked = prefs.notificationsEnabled,
+                    onToggle = { onNotificationToggle() })
                 if (prefs.notificationsEnabled && needsExactNotif) {
                     PermissionBannerRow(onGrant = { viewModel.openExactAlarmSettings() })
                 }
                 if (prefs.notificationsEnabled) {
                     SettingsDivider()
                     TimeRow(
-                        title       = stringResource(R.string.settings_notif_time),
+                        title = stringResource(R.string.settings_notif_time),
                         description = stringResource(R.string.settings_notif_time_desc),
-                        hour        = prefs.notificationHour,
-                        minute      = prefs.notificationMinute,
-                        onClick     = { showNotifTimePicker = true }
-                    )
+                        hour = prefs.notificationHour,
+                        minute = prefs.notificationMinute,
+                        onClick = { showNotifTimePicker = true })
                 }
             }
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Daily Alarm ───────────────────────────────────────────────────
             SectionLabel(stringResource(R.string.settings_alarm))
             Spacer(Modifier.height(8.dp))
             SettingsCard {
                 ToggleRow(
-                    title       = stringResource(R.string.settings_alarm_daily),
+                    title = stringResource(R.string.settings_alarm_daily),
                     description = stringResource(R.string.settings_alarm_daily_desc),
-                    checked     = prefs.alarmEnabled,
-                    onToggle    = { onAlarmToggle() }
-                )
+                    checked = prefs.alarmEnabled,
+                    onToggle = { onAlarmToggle() })
                 if (prefs.alarmEnabled && needsExactAlarm) {
                     PermissionBannerRow(onGrant = { viewModel.openExactAlarmSettings() })
                 }
                 if (prefs.alarmEnabled) {
                     SettingsDivider()
                     TimeRow(
-                        title       = stringResource(R.string.settings_alarm_time),
+                        title = stringResource(R.string.settings_alarm_time),
                         description = stringResource(R.string.settings_alarm_time_desc),
-                        hour        = prefs.alarmHour,
-                        minute      = prefs.alarmMinute,
-                        onClick     = { showAlarmTimePicker = true }
-                    )
+                        hour = prefs.alarmHour,
+                        minute = prefs.alarmMinute,
+                        onClick = { showAlarmTimePicker = true })
                 }
             }
 
@@ -211,29 +248,34 @@ fun SettingsScreen(
 
     if (showNotifTimePicker) {
         WeatherTimePicker(
-            title         = stringResource(R.string.settings_notif_pick_time),
-            initialHour   = prefs.notificationHour,
+            title = stringResource(R.string.settings_notif_pick_time),
+            initialHour = prefs.notificationHour,
             initialMinute = prefs.notificationMinute,
-            onConfirm     = { h, m -> viewModel.setNotificationTime(h, m); showNotifTimePicker = false },
-            onDismiss     = { showNotifTimePicker = false }
-        )
+            onConfirm = { h, m ->
+                viewModel.setNotificationTime(h, m); showNotifTimePicker = false
+            },
+            onDismiss = { showNotifTimePicker = false })
     }
     if (showAlarmTimePicker) {
         WeatherTimePicker(
-            title         = stringResource(R.string.settings_alarm_pick_time),
-            initialHour   = prefs.alarmHour,
+            title = stringResource(R.string.settings_alarm_pick_time),
+            initialHour = prefs.alarmHour,
             initialMinute = prefs.alarmMinute,
-            onConfirm     = { h, m -> viewModel.setAlarmTime(h, m); showAlarmTimePicker = false },
-            onDismiss     = { showAlarmTimePicker = false }
-        )
+            onConfirm = { h, m -> viewModel.setAlarmTime(h, m); showAlarmTimePicker = false },
+            onDismiss = { showAlarmTimePicker = false })
     }
 }
 
 @Composable
 private fun SectionLabel(text: String) {
-    Text(text = text, color = WeatherColors.TextSecondary, fontSize = 11.sp,
-        fontWeight = FontWeight.Medium, letterSpacing = 0.8.sp,
-        modifier = Modifier.padding(horizontal = 20.dp))
+    Text(
+        text = text,
+        color = WeatherColors.TextSecondary,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Medium,
+        letterSpacing = 0.8.sp,
+        modifier = Modifier.padding(horizontal = 20.dp)
+    )
 }
 
 @Composable
@@ -243,46 +285,55 @@ private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(WeatherColors.CardBgDark),
-        content = content
+            .background(WeatherColors.CardBgDark), content = content
     )
 }
 
 @Composable
 private fun SettingsDivider() {
-    HorizontalDivider(color = WeatherColors.Divider, thickness = 0.5.dp,
-        modifier = Modifier.padding(horizontal = 20.dp))
+    HorizontalDivider(
+        color = WeatherColors.Divider,
+        thickness = 0.5.dp,
+        modifier = Modifier.padding(horizontal = 20.dp)
+    )
 }
 
 @Composable
 private fun ToggleRow(
-    title      : String,
-    description: String,
-    checked    : Boolean,
-    onToggle   : () -> Unit
+    title: String, description: String, checked: Boolean, onToggle: () -> Unit
 ) {
     Row(
-        modifier              = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp),
-        verticalAlignment     = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(title, color = WeatherColors.TextPrimary, fontSize = 15.sp,
-                fontWeight = FontWeight.Medium)
+        Column(Modifier
+            .weight(1f)
+            .padding(end = 12.dp)) {
+            Text(
+                title,
+                color = WeatherColors.TextPrimary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium
+            )
             Spacer(Modifier.height(2.dp))
-            Text(description, color = WeatherColors.TextSecondary, fontSize = 12.sp,
-                lineHeight = 16.sp)
+            Text(
+                description,
+                color = WeatherColors.TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 16.sp
+            )
         }
         Switch(
-            checked         = checked,
-            onCheckedChange = { onToggle() },
-            colors          = SwitchDefaults.colors(
-                checkedThumbColor       = WeatherColors.TextPrimary,
-                checkedTrackColor       = WeatherColors.TextPrimary.copy(alpha = 0.35f),
-                uncheckedThumbColor     = WeatherColors.TextSecondary,
-                uncheckedTrackColor     = WeatherColors.TextSecondary.copy(alpha = 0.2f),
-                uncheckedBorderColor    = Color.Transparent,
-                checkedBorderColor      = Color.Transparent
+            checked = checked, onCheckedChange = { onToggle() }, colors = SwitchDefaults.colors(
+                checkedThumbColor = WeatherColors.TextPrimary,
+                checkedTrackColor = WeatherColors.TextPrimary.copy(alpha = 0.35f),
+                uncheckedThumbColor = WeatherColors.TextSecondary,
+                uncheckedTrackColor = WeatherColors.TextSecondary.copy(alpha = 0.2f),
+                uncheckedBorderColor = Color.Transparent,
+                checkedBorderColor = Color.Transparent
             )
         )
     }
@@ -292,51 +343,68 @@ private fun ToggleRow(
 private fun PermissionBannerRow(onGrant: () -> Unit) {
     SettingsDivider()
     Row(
-        modifier          = Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFFFFB300).copy(alpha = 0.15f))
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(Icons.Default.Warning, contentDescription = null,
-            tint = Color(0xFFFFB300), modifier = Modifier.size(20.dp))
+        Icon(
+            Icons.Default.Warning,
+            contentDescription = null,
+            tint = Color(0xFFFFB300),
+            modifier = Modifier.size(20.dp)
+        )
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.notif_exact_alarm_title),
-                color = WeatherColors.TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-            Text(stringResource(R.string.notif_exact_alarm_desc),
-                color = WeatherColors.TextSecondary, fontSize = 11.sp, lineHeight = 14.sp)
+            Text(
+                stringResource(R.string.notif_exact_alarm_title),
+                color = WeatherColors.TextPrimary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                stringResource(R.string.notif_exact_alarm_desc),
+                color = WeatherColors.TextSecondary,
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
         }
         TextButton(onClick = onGrant) {
-            Text(stringResource(R.string.notif_exact_alarm_grant),
-                color = Color(0xFFFFB300), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                stringResource(R.string.notif_exact_alarm_grant),
+                color = Color(0xFFFFB300),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
 
 @Composable
 private fun TimeRow(
-    title      : String,
-    description: String,
-    hour       : Int,
-    minute     : Int,
-    onClick    : () -> Unit
+    title: String, description: String, hour: Int, minute: Int, onClick: () -> Unit
 ) {
-    // Localization Fix: Use the current locale for time formatting
     val configuration = LocalConfiguration.current
     val locale = configuration.locales[0] ?: Locale.getDefault()
 
     Row(
-        modifier              = Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 14.dp),
-        verticalAlignment     = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(title, color = WeatherColors.TextPrimary, fontSize = 15.sp,
-                fontWeight = FontWeight.Medium)
+        Column(Modifier
+            .weight(1f)
+            .padding(end = 12.dp)) {
+            Text(
+                title,
+                color = WeatherColors.TextPrimary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium
+            )
             Spacer(Modifier.height(2.dp))
             Text(description, color = WeatherColors.TextSecondary, fontSize = 12.sp)
         }
@@ -344,11 +412,10 @@ private fun TimeRow(
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
                 .background(WeatherColors.TextPrimary.copy(alpha = 0.2f))
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
+                .padding(horizontal = 14.dp, vertical = 8.dp), contentAlignment = Alignment.Center
         ) {
             Text(
-                String.format(locale, "%02d:%02d", hour, minute), // Fixed locale formatting
+                String.format(locale, "%02d:%02d", hour, minute),
                 color = WeatherColors.TextPrimary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
@@ -359,10 +426,10 @@ private fun TimeRow(
 
 @Composable
 private fun SegmentedControl(
-    options  : List<Pair<String, String>>,
-    selected : String,
-    onSelect : (String) -> Unit,
-    modifier : Modifier = Modifier
+    options: List<Pair<String, String>>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
@@ -381,12 +448,13 @@ private fun SegmentedControl(
                     .background(if (active) WeatherColors.TextPrimary.copy(alpha = 0.2f) else Color.Transparent)
                     .clickable { onSelect(value) }
                     .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(label,
-                    color      = if (active) WeatherColors.TextPrimary else WeatherColors.TextSecondary,
-                    fontSize   = 15.sp,
-                    fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal)
+                contentAlignment = Alignment.Center) {
+                Text(
+                    label,
+                    color = if (active) WeatherColors.TextPrimary else WeatherColors.TextSecondary,
+                    fontSize = 15.sp,
+                    fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
+                )
             }
         }
     }
@@ -395,70 +463,76 @@ private fun SegmentedControl(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WeatherTimePicker(
-    title        : String,
-    initialHour  : Int,
+    title: String,
+    initialHour: Int,
     initialMinute: Int,
-    onConfirm    : (hour: Int, minute: Int) -> Unit,
-    onDismiss    : () -> Unit
+    onConfirm: (hour: Int, minute: Int) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val state = rememberTimePickerState(
-        initialHour   = initialHour,
-        initialMinute = initialMinute,
-        is24Hour      = true
+        initialHour = initialHour, initialMinute = initialMinute, is24Hour = true
     )
-    // AlertDialog uses a Popup internally and loses CompositionLocals.
-    // Capture and re-provide the localized context so stringResource() inside
-    // the dialog still resolves strings in the user's chosen language.
-    val configuration   = LocalConfiguration.current
+
+    val configuration = LocalConfiguration.current
     val layoutDirection = LocalLayoutDirection.current
-    val baseContext     = LocalContext.current
+    val baseContext = LocalContext.current
     val localizedContext = remember(configuration) {
         baseContext.createConfigurationContext(configuration)
     }
     CompositionLocalProvider(
-        LocalContext        provides localizedContext,
+        LocalContext provides localizedContext,
         LocalConfiguration provides configuration,
         LocalLayoutDirection provides layoutDirection
     ) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            containerColor   = WeatherColors.CardBgDark,
-            tonalElevation   = 0.dp,
-            shape            = RoundedCornerShape(20.dp),
+            containerColor = WeatherColors.CardBgDark,
+            tonalElevation = 0.dp,
+            shape = RoundedCornerShape(20.dp),
             title = {
-                Text(title, color = WeatherColors.TextPrimary, fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium)
+                Text(
+                    title,
+                    color = WeatherColors.TextPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
             },
             text = {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     TimePicker(
-                        state  = state,
-                        colors = TimePickerDefaults.colors(
-                            clockDialColor                      = WeatherColors.CardBg,
-                            clockDialSelectedContentColor       = WeatherColors.TextPrimary,
-                            clockDialUnselectedContentColor     = WeatherColors.TextSecondary,
-                            selectorColor                       = WeatherColors.TextPrimary.copy(alpha = 0.7f),
-                            containerColor                      = WeatherColors.CardBgDark,
-                            periodSelectorBorderColor           = WeatherColors.Divider,
-                            timeSelectorSelectedContainerColor  = WeatherColors.TextPrimary.copy(alpha = 0.2f),
-                            timeSelectorUnselectedContainerColor= WeatherColors.CardBg,
-                            timeSelectorSelectedContentColor    = WeatherColors.TextPrimary,
-                            timeSelectorUnselectedContentColor  = WeatherColors.TextSecondary
+                        state = state, colors = TimePickerDefaults.colors(
+                            clockDialColor = WeatherColors.CardBg,
+                            clockDialSelectedContentColor = WeatherColors.TextPrimary,
+                            clockDialUnselectedContentColor = WeatherColors.TextSecondary,
+                            selectorColor = WeatherColors.TextPrimary.copy(alpha = 0.7f),
+                            containerColor = WeatherColors.CardBgDark,
+                            periodSelectorBorderColor = WeatherColors.Divider,
+                            timeSelectorSelectedContainerColor = WeatherColors.TextPrimary.copy(
+                                alpha = 0.2f
+                            ),
+                            timeSelectorUnselectedContainerColor = WeatherColors.CardBg,
+                            timeSelectorSelectedContentColor = WeatherColors.TextPrimary,
+                            timeSelectorUnselectedContentColor = WeatherColors.TextSecondary
                         )
                     )
                 }
             },
             confirmButton = {
                 TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
-                    Text(stringResource(R.string.settings_ok), color = WeatherColors.TextPrimary,
-                        fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.settings_ok),
+                        color = WeatherColors.TextPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.settings_cancel), color = WeatherColors.TextSecondary)
+                    Text(
+                        stringResource(R.string.settings_cancel),
+                        color = WeatherColors.TextSecondary
+                    )
                 }
-            }
-        )
-    } // end CompositionLocalProvider
+            })
+    }
 }

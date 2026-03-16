@@ -6,12 +6,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.google.gson.Gson
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
-private val Context.weatherDataStore: DataStore<Preferences>
-        by preferencesDataStore(name = "weather_cache")
+private val Context.weatherDataStore: DataStore<Preferences> by preferencesDataStore(name = "weather_cache")
 
 interface WeatherLocalDataSource {
     suspend fun saveWeatherCache(cityName: String, json: String)
@@ -33,9 +31,7 @@ class WeatherLocalDataSourceImpl(
     }
 
     override suspend fun loadWeatherCache(cityName: String): String? =
-        context.weatherDataStore.data
-            .map { prefs -> prefs[cacheKey(cityName)] }
-            .firstOrNull()
+        context.weatherDataStore.data.map { prefs -> prefs[cacheKey(cityName)] }.firstOrNull()
 
     override suspend fun clearCache(cityName: String) {
         context.weatherDataStore.edit { prefs ->

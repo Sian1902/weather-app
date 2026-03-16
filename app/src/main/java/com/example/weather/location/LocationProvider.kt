@@ -10,10 +10,8 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 
 interface LocationProvider {
-    /** Returns the last cached location instantly. Null if none available. */
     suspend fun getLastLocation(): Location?
 
-    /** Requests a fresh fix. Returns null if GPS is off or no fix within 10 s. */
     suspend fun getCurrentLocation(): Location?
 }
 
@@ -22,19 +20,19 @@ class LocationProviderImpl(context: Context) : LocationProvider {
     private val fusedClient = LocationServices.getFusedLocationProviderClient(context)
 
     @SuppressLint("MissingPermission")
-    override suspend fun getLastLocation(): Location? =
-        try { fusedClient.lastLocation.await() } catch (_: Exception) { null }
+    override suspend fun getLastLocation(): Location? = try {
+        fusedClient.lastLocation.await()
+    } catch (_: Exception) {
+        null
+    }
 
     @SuppressLint("MissingPermission")
     override suspend fun getCurrentLocation(): Location? {
         val cts = CancellationTokenSource()
         return try {
-            // withTimeoutOrNull cancels the Task and returns null if no fix arrives
-            // within 10 seconds — prevents hanging on emulators with no mock location.
             withTimeoutOrNull(10_000L) {
                 fusedClient.getCurrentLocation(
-                    Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-                    cts.token
+                    Priority.PRIORITY_BALANCED_POWER_ACCURACY, cts.token
                 ).await()
             }
         } catch (_: Exception) {

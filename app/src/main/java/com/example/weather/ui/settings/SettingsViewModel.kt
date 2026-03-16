@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.weather.data.local.UserPreferences
-import com.example.weather.data.local.UserPreferencesDataSource
-import com.example.weather.worker.WeatherAlarmReceiver
-import com.example.weather.worker.WeatherNotificationReceiver
+import com.example.weather.data.local.prefs.UserPreferences
+import com.example.weather.data.local.prefs.UserPreferencesDataSource
+import com.example.weather.data.local.worker.WeatherAlarmReceiver
+import com.example.weather.data.local.worker.WeatherNotificationReceiver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,42 +17,35 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val prefsDataSource  : UserPreferencesDataSource,
-    private val appContext       : Context,
+    private val prefsDataSource: UserPreferencesDataSource,
+    private val appContext: Context,
     private val onLanguageChanged: (String) -> Unit,
-    private val onUnitsToggled   : () -> Unit
+    private val onUnitsToggled: () -> Unit
 ) : ViewModel() {
 
-    val preferences: StateFlow<UserPreferences> = prefsDataSource.userPreferences
-        .stateIn(
-            scope        = viewModelScope,
-            started      = SharingStarted.WhileSubscribed(5_000),
+    val preferences: StateFlow<UserPreferences> = prefsDataSource.userPreferences.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
             initialValue = UserPreferences()
         )
 
-    // Separate flags for notification vs alarm — each has its own banner in the UI
-    private val _needsExactAlarmPermission       = MutableStateFlow(false)
+    private val _needsExactAlarmPermission = MutableStateFlow(false)
     val needsExactAlarmPermission: StateFlow<Boolean> = _needsExactAlarmPermission.asStateFlow()
 
-    private val _needsExactAlarmPermissionAlarm  = MutableStateFlow(false)
-    val needsExactAlarmPermissionAlarm: StateFlow<Boolean> = _needsExactAlarmPermissionAlarm.asStateFlow()
-
-    // ── Language ──────────────────────────────────────────────────────────────
+    private val _needsExactAlarmPermissionAlarm = MutableStateFlow(false)
+    val needsExactAlarmPermissionAlarm: StateFlow<Boolean> =
+        _needsExactAlarmPermissionAlarm.asStateFlow()
 
     fun setLanguage(language: String) {
         viewModelScope.launch { prefsDataSource.setLanguage(language) }
         onLanguageChanged(language)
     }
 
-    // ── Units ─────────────────────────────────────────────────────────────────
-
     fun toggleUnits() = onUnitsToggled()
-
-    // ── Notification ──────────────────────────────────────────────────────────
 
     fun toggleNotifications() {
         viewModelScope.launch {
-            val current  = prefsDataSource.userPreferences.first()
+            val current = prefsDataSource.userPreferences.first()
             val enabling = !current.notificationsEnabled
             prefsDataSource.setNotificationsEnabled(enabling)
             if (enabling) {
@@ -82,22 +75,26 @@ class SettingsViewModel(
 
     fun recheckExactAlarmPermission() {
         if (!WeatherNotificationReceiver.canScheduleExact(appContext)) return
-        _needsExactAlarmPermission.value      = false
+        _needsExactAlarmPermission.value = false
         _needsExactAlarmPermissionAlarm.value = false
         viewModelScope.launch {
             val prefs = prefsDataSource.userPreferences.first()
-            if (prefs.notificationsEnabled)
-                WeatherNotificationReceiver.scheduleDaily(appContext, prefs.notificationHour, prefs.notificationMinute)
-            if (prefs.alarmEnabled)
-                WeatherAlarmReceiver.scheduleDaily(appContext, prefs.alarmHour, prefs.alarmMinute)
+            if (prefs.notificationsEnabled) WeatherNotificationReceiver.scheduleDaily(
+                appContext,
+                prefs.notificationHour,
+                prefs.notificationMinute
+            )
+            if (prefs.alarmEnabled) WeatherAlarmReceiver.scheduleDaily(
+                appContext,
+                prefs.alarmHour,
+                prefs.alarmMinute
+            )
         }
     }
 
-    // ── Alarm ─────────────────────────────────────────────────────────────────
-
     fun toggleAlarm() {
         viewModelScope.launch {
-            val current  = prefsDataSource.userPreferences.first()
+            val current = prefsDataSource.userPreferences.first()
             val enabling = !current.alarmEnabled
             prefsDataSource.setAlarmEnabled(enabling)
             if (enabling) {
@@ -123,23 +120,20 @@ class SettingsViewModel(
         }
     }
 
-    // ── Factory ───────────────────────────────────────────────────────────────
-
     class Factory(
-        private val prefsDataSource  : UserPreferencesDataSource,
-        private val appContext       : Context,
+        private val prefsDataSource: UserPreferencesDataSource,
+        private val appContext: Context,
         private val onLanguageChanged: (String) -> Unit,
-        private val onUnitsToggled   : () -> Unit
+        private val onUnitsToggled: () -> Unit
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(SettingsViewModel::class.java))
-                return SettingsViewModel(
-                    prefsDataSource   = prefsDataSource,
-                    appContext        = appContext,
-                    onLanguageChanged = onLanguageChanged,
-                    onUnitsToggled    = onUnitsToggled
-                ) as T
+            if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) return SettingsViewModel(
+                prefsDataSource = prefsDataSource,
+                appContext = appContext,
+                onLanguageChanged = onLanguageChanged,
+                onUnitsToggled = onUnitsToggled
+            ) as T
             throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }
     }

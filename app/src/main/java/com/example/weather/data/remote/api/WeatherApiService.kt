@@ -1,5 +1,7 @@
-package com.example.weather.data.remote
+package com.example.weather.data.remote.api
 
+import com.example.weather.data.remote.dto.CurrentWeatherDto
+import com.example.weather.data.remote.dto.ForecastResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 

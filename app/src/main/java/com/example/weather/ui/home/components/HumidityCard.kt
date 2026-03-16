@@ -1,6 +1,7 @@
 package com.example.weather.ui.home.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,8 +15,7 @@ import com.example.weather.ui.theme.WeatherColors
 
 @Composable
 fun HumidityCard(
-    humidity : Int,
-    modifier : Modifier = Modifier
+    humidity: Int, modifier: Modifier = Modifier
 ) {
     val description = when {
         humidity < 30 -> stringResource(R.string.humidity_very_dry)
@@ -23,25 +23,24 @@ fun HumidityCard(
         humidity < 60 -> stringResource(R.string.humidity_slightly)
         humidity < 75 -> stringResource(R.string.humidity_fairly)
         humidity < 90 -> stringResource(R.string.humidity_high)
-        else          -> stringResource(R.string.humidity_very_high)
+        else -> stringResource(R.string.humidity_very_high)
     }
 
     DetailCard(modifier = modifier, minHeight = 160.dp) {
         CardHeader(
-            iconRes = R.drawable.ic_humidity,
-            title = stringResource(R.string.card_humidity)
+            iconRes = R.drawable.ic_humidity, title = stringResource(R.string.card_humidity)
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text       = "$humidity%",
-            color      = WeatherColors.TextPrimary,
-            fontSize   = 36.sp,
+            text = "$humidity%",
+            color = WeatherColors.TextPrimary,
+            fontSize = 36.sp,
             fontWeight = FontWeight.Light
         )
         Spacer(Modifier.weight(1f))
         Text(
-            text     = description,
-            color    = WeatherColors.TextSecondary,
+            text = description,
+            color = WeatherColors.TextSecondary,
             fontSize = 11.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis

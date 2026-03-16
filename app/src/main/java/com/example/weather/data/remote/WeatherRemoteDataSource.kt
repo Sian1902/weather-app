@@ -1,5 +1,9 @@
 package com.example.weather.data.remote
 
+import com.example.weather.data.remote.api.WeatherApiService
+import com.example.weather.data.remote.dto.CurrentWeatherDto
+import com.example.weather.data.remote.dto.ForecastResponseDto
+
 interface WeatherRemoteDataSource {
 
     suspend fun getCurrentWeatherByCoordinates(

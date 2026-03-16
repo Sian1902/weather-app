@@ -1,9 +1,9 @@
-package com.example.weather.worker
+package com.example.weather.data.local.worker
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.example.weather.data.local.UserPreferencesDataSourceImpl
+import com.example.weather.data.local.prefs.UserPreferencesDataSourceImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first

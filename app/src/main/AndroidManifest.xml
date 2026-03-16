@@ -59,17 +59,17 @@
 
         <!-- Fires the daily weather notification at the exact scheduled time -->
         <receiver
-            android:name=".worker.WeatherNotificationReceiver"
+            android:name=".data.local.worker.WeatherNotificationReceiver"
             android:exported="false" />
 
         <!-- Fires the daily weather alarm (with sound) at the exact scheduled time -->
         <receiver
-            android:name=".worker.WeatherAlarmReceiver"
+            android:name=".data.local.worker.WeatherAlarmReceiver"
             android:exported="false" />
 
         <!-- Handles the Dismiss button on the alarm notification -->
         <receiver
-            android:name=".worker.AlarmDismissReceiver"
+            android:name=".data.local.worker.AlarmDismissReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.example.weather.ACTION_DISMISS_ALARM" />
@@ -78,7 +78,7 @@
 
         <!-- Restores the alarm after the device reboots (AlarmManager alarms don't survive reboots) -->
         <receiver
-            android:name=".worker.BootReceiver"
+            android:name=".data.local.worker.BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

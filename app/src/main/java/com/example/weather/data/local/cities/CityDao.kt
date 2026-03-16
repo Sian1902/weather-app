@@ -1,6 +1,10 @@
 package com.example.weather.data.local.cities
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -15,7 +19,6 @@ interface CityDao {
     @Delete
     suspend fun deleteCity(city: CityEntity)
 
-    /** Clears the default flag on every row before setting a new one. */
     @Query("UPDATE cities SET isDefault = 0")
     suspend fun clearAllDefaults()
 
@@ -28,12 +31,13 @@ interface CityDao {
     @Query("SELECT * FROM cities WHERE isCurrentLocation = 1 LIMIT 1")
     suspend fun getCurrentLocationCity(): CityEntity?
 
-    /** Upsert the current-location row by matching isCurrentLocation = 1. */
-    @Query("""
+    @Query(
+        """
         UPDATE cities
         SET name = :name, lat = :lat, lon = :lon, addedAt = :addedAt
         WHERE isCurrentLocation = 1
-    """)
+    """
+    )
     suspend fun updateCurrentLocationCity(name: String, lat: Double, lon: Double, addedAt: Long)
 
     @Query("SELECT COUNT(*) FROM cities WHERE isCurrentLocation = 1")

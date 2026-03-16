@@ -17,8 +17,7 @@ fun SparkLine(values: List<Float>, color: Color) {
     if (values.size < 2) return
 
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    // In RTL the day columns are rendered right-to-left (index 0 on the right),
-    // so we reverse the values to keep each sparkline point aligned with its column.
+
     val orderedValues = if (isRtl) values.reversed() else values
 
     val min = orderedValues.minOrNull() ?: 0f
@@ -34,10 +33,10 @@ fun SparkLine(values: List<Float>, color: Color) {
         val h = size.height
         val step = w / (orderedValues.size - 1)
 
+
         val points = orderedValues.mapIndexed { i, v ->
             Offset(
-                x = i * step,
-                y = h - ((v - min) / range) * (h * 0.8f) - (h * 0.1f)
+                x = i * step, y = h - ((v - min) / range) * (h * 0.8f) - (h * 0.1f)
             )
         }
 

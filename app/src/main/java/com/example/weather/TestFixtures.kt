@@ -1,25 +1,19 @@
 package com.example.weather
 
 import com.example.weather.data.local.cities.CityEntity
-import com.example.weather.data.remote.CityDto
-import com.example.weather.data.remote.CloudsDto
-import com.example.weather.data.remote.CoordDto
-import com.example.weather.data.remote.CurrentWeatherDto
-import com.example.weather.data.remote.ForecastItemDto
-import com.example.weather.data.remote.ForecastResponseDto
-import com.example.weather.data.remote.MainDto
-import com.example.weather.data.remote.SysDto
-import com.example.weather.data.remote.WeatherDescriptionDto
-import com.example.weather.data.remote.WindDto
+import com.example.weather.data.remote.dto.CityDto
+import com.example.weather.data.remote.dto.CloudsDto
+import com.example.weather.data.remote.dto.CoordDto
+import com.example.weather.data.remote.dto.CurrentWeatherDto
+import com.example.weather.data.remote.dto.ForecastItemDto
+import com.example.weather.data.remote.dto.ForecastResponseDto
+import com.example.weather.data.remote.dto.MainDto
+import com.example.weather.data.remote.dto.SysDto
+import com.example.weather.data.remote.dto.WeatherDescriptionDto
+import com.example.weather.data.remote.dto.WindDto
 import com.example.weather.data.repository.WeatherResult
 
-/**
- * Shared test fixtures used across all unit tests.
- * Centralised here so a single change propagates everywhere.
- */
 object TestFixtures {
-
-    // ── DTOs ──────────────────────────────────────────────────────────────────
 
     val mainDto = MainDto(
         temp = 22.0,
@@ -83,7 +77,6 @@ object TestFixtures {
     val liveResult   = WeatherResult.Live(currentWeatherDto, forecastResponseDto)
     val cachedResult = WeatherResult.Cached(currentWeatherDto, forecastResponseDto, 1_700_000_000L)
 
-    // ── Cities ────────────────────────────────────────────────────────────────
 
     fun cityEntity(
         id                : Int     = 1,

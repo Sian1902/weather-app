@@ -1,6 +1,7 @@
-package com.example.weather.worker
+package com.example.weather.data.local.worker
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -19,12 +20,12 @@ class AlarmDismissReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_DISMISS = "com.example.weather.ACTION_DISMISS_ALARM"
 
-        fun dismissPendingIntent(context: Context): android.app.PendingIntent =
-            android.app.PendingIntent.getBroadcast(
+        fun dismissPendingIntent(context: Context): PendingIntent =
+            PendingIntent.getBroadcast(
                 context,
                 2,   // unique requestCode
                 Intent(ACTION_DISMISS).setPackage(context.packageName),
-                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
     }
 }

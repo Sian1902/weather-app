@@ -1,6 +1,14 @@
 package com.example.weather.ui.home.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,8 +27,7 @@ import com.example.weather.ui.theme.WeatherColors
 
 @Composable
 fun ForecastCard(
-    items: List<DailyItem>,
-    onExtendedForecastClick: () -> Unit = {}
+    items: List<DailyItem>, onExtendedForecastClick: () -> Unit = {}
 ) {
     GlassCard(
         modifier = Modifier
@@ -33,7 +40,7 @@ fun ForecastCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Actions (Icons) - Arrangement.SpaceBetween handles RTL flip
+
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_chart_view),
@@ -48,7 +55,6 @@ fun ForecastCard(
                         modifier = Modifier.size(20.dp)
                     )
                 }
-                // Title and Icon
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(R.string.weather_forecast),
@@ -68,8 +74,7 @@ fun ForecastCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 items.forEach { item ->
                     DailyItemView(item = item, modifier = Modifier.weight(1f))
@@ -77,28 +82,26 @@ fun ForecastCard(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            // Ensure numeric filtering works for localized digits if necessary
             SparkLine(
                 values = items.map { it.high.replace(Regex("[^0-9-]"), "").toFloatOrNull() ?: 0f },
-                color  = WeatherColors.SparkHigh
+                color = WeatherColors.SparkHigh
             )
             Spacer(modifier = Modifier.height(4.dp))
             SparkLine(
                 values = items.map { it.low.replace(Regex("[^0-9-]"), "").toFloatOrNull() ?: 0f },
-                color  = WeatherColors.SparkLow
+                color = WeatherColors.SparkLow
             )
 
             Spacer(modifier = Modifier.height(8.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 items.forEach { item ->
                     Text(
-                        text      = item.low,
-                        color     = WeatherColors.TextSecondary,
-                        fontSize  = 13.sp,
-                        modifier  = Modifier.weight(1f),
+                        text = item.low,
+                        color = WeatherColors.TextSecondary,
+                        fontSize = 13.sp,
+                        modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -112,43 +115,40 @@ fun ForecastCard(
 private fun DailyItemView(item: DailyItem, modifier: Modifier = Modifier) {
     val dayLabel = when (item.day.uppercase()) {
         "TODAY" -> stringResource(R.string.day_today)
-        "MON"   -> stringResource(R.string.day_monday)
-        "TUE"   -> stringResource(R.string.day_tuesday)
-        "WED"   -> stringResource(R.string.day_wednesday)
-        "THU"   -> stringResource(R.string.day_thursday)
-        "FRI"   -> stringResource(R.string.day_friday)
-        "SAT"   -> stringResource(R.string.day_saturday)
-        "SUN"   -> stringResource(R.string.day_sunday)
-        else    -> item.day
+        "MON" -> stringResource(R.string.day_monday)
+        "TUE" -> stringResource(R.string.day_tuesday)
+        "WED" -> stringResource(R.string.day_wednesday)
+        "THU" -> stringResource(R.string.day_thursday)
+        "FRI" -> stringResource(R.string.day_friday)
+        "SAT" -> stringResource(R.string.day_saturday)
+        "SUN" -> stringResource(R.string.day_sunday)
+        else -> item.day
     }
 
     Column(
-        modifier            = modifier,
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text       = dayLabel,
-            color      = WeatherColors.TextPrimary,
-            fontSize   = 13.sp,
+            text = dayLabel,
+            color = WeatherColors.TextPrimary,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            maxLines   = 1
-        )
-        Text(
-            text     = item.date,
-            color    = WeatherColors.TextSecondary,
-            fontSize = 11.sp,
             maxLines = 1
         )
+        Text(
+            text = item.date, color = WeatherColors.TextSecondary, fontSize = 11.sp, maxLines = 1
+        )
         AsyncImage(
-            model              = "https://openweathermap.org/img/wn/${item.iconCode}@2x.png",
+            model = "https://openweathermap.org/img/wn/${item.iconCode}@2x.png",
             contentDescription = null,
-            modifier           = Modifier.size(32.dp)
+            modifier = Modifier.size(32.dp)
         )
         Text(
-            text       = item.high,
-            color      = WeatherColors.TextPrimary,
-            fontSize   = 14.sp,
+            text = item.high,
+            color = WeatherColors.TextPrimary,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
     }

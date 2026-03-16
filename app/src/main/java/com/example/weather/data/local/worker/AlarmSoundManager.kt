@@ -1,4 +1,4 @@
-package com.example.weather.worker
+package com.example.weather.data.local.worker
 
 import android.Manifest
 import android.content.Context

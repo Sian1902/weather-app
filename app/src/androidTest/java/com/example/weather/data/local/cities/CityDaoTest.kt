@@ -9,27 +9,26 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Instrumented test — runs on an Android device/emulator.
- * Uses an in-memory Room database so each test starts with a clean slate.
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CityDaoTest {
 
-    private lateinit var db : CityDatabase
+    private lateinit var db: CityDatabase
     private lateinit var dao: CityDao
 
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db  = Room.inMemoryDatabaseBuilder(context, CityDatabase::class.java)
-            .allowMainThreadQueries()   // allowed in tests only
+        db = Room.inMemoryDatabaseBuilder(context, CityDatabase::class.java)
+            .allowMainThreadQueries()
             .build()
         dao = db.cityDao()
     }
@@ -37,7 +36,6 @@ class CityDaoTest {
     @After
     fun tearDown() = db.close()
 
-    // ── Test 1: insertCity and getAllCities ───────────────────────────────────
 
     @Test
     fun insertCity_and_getAllCities_returnsInsertedCity() = runTest {
@@ -49,7 +47,6 @@ class CityDaoTest {
         assertEquals("Cairo", cities[0].name)
     }
 
-    // ── Test 2: deleteCity removes it from the list ───────────────────────────
 
     @Test
     fun deleteCity_removesItFromDatabase() = runTest {
@@ -61,16 +58,14 @@ class CityDaoTest {
         assertTrue("City list should be empty after delete", cities.isEmpty())
     }
 
-    // ── Test 3: setDefault clears previous default and sets new one ───────────
 
     @Test
     fun setDefaultById_clearsOldAndSetsNewDefault() = runTest {
-        val cairo  = TestFixtures.cityEntity(id = 1, name = "Cairo",  isDefault = true)
+        val cairo = TestFixtures.cityEntity(id = 1, name = "Cairo", isDefault = true)
         val london = TestFixtures.cityEntity(id = 2, name = "London", isDefault = false)
         dao.insertCity(cairo)
         dao.insertCity(london)
 
-        // Move default from Cairo (1) to London (2)
         dao.clearAllDefaults()
         dao.setDefaultById(2)
 
@@ -79,9 +74,8 @@ class CityDaoTest {
         assertEquals("London", defaultCity!!.name)
         assertTrue(defaultCity.isDefault)
 
-        // Cairo must no longer be default
         val allCities = dao.getAllCities().first()
-        val cairoRow  = allCities.firstOrNull { it.name == "Cairo" }
+        val cairoRow = allCities.firstOrNull { it.name == "Cairo" }
         assertNotNull(cairoRow)
         assertFalse("Cairo should no longer be default", cairoRow!!.isDefault)
     }

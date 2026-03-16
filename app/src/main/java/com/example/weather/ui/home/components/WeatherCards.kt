@@ -1,7 +1,15 @@
 package com.example.weather.ui.home.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -17,8 +25,7 @@ import com.example.weather.ui.theme.WeatherColors
 
 @Composable
 fun GlassCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    modifier: Modifier = Modifier, content: @Composable () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -29,22 +36,20 @@ fun GlassCard(
     }
 }
 
-/** Single source of truth for every detail-card height — all grid cards are this tall. */
 val CARD_HEIGHT = 200.dp
 
 @Composable
 fun DetailCard(
-    modifier  : Modifier = Modifier,
-    minHeight : Dp = CARD_HEIGHT,   // kept for API compatibility — ignored internally
-    content   : @Composable ColumnScope.() -> Unit
+    modifier: Modifier = Modifier,
+    minHeight: Dp = CARD_HEIGHT,
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .background(WeatherColors.CardBgDark)
             .padding(14.dp)
-            .height(CARD_HEIGHT),
-        content = content
+            .height(CARD_HEIGHT), content = content
     )
 }
 

@@ -1,5 +1,6 @@
-package com.example.weather.worker
+package com.example.weather.data.local.worker
 
+import android.R
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -13,9 +14,8 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.example.weather.BuildConfig
 import com.example.weather.MainActivity
-import com.example.weather.R
-import com.example.weather.data.local.UserPreferencesDataSourceImpl
-import com.example.weather.data.remote.RetrofitClient
+import com.example.weather.data.local.prefs.UserPreferencesDataSourceImpl
+import com.example.weather.data.remote.api.RetrofitClient
 import com.example.weather.data.remote.WeatherRemoteDataSourceImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -113,8 +113,8 @@ class WeatherNotificationReceiver : BroadcastReceiver() {
         // Fall back to the built-in Android stat_notify_chat icon if it doesn't exist yet.
         val iconRes = runCatching {
             context.resources.getIdentifier("ic_notification", "drawable", context.packageName)
-                .takeIf { it != 0 } ?: android.R.drawable.ic_dialog_info
-        }.getOrDefault(android.R.drawable.ic_dialog_info)
+                .takeIf { it != 0 } ?: R.drawable.ic_dialog_info
+        }.getOrDefault(R.drawable.ic_dialog_info)
 
         manager.notify(
             NOTIFICATION_ID,

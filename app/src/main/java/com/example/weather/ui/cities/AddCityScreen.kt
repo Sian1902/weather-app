@@ -1,22 +1,49 @@
 package com.example.weather.ui.cities
 
-import androidx.preference.PreferenceManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -24,12 +51,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.preference.PreferenceManager
 import com.example.weather.R
 import com.example.weather.data.local.cities.CityEntity
 import com.example.weather.ui.theme.WeatherColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.osmdroid.config.Configuration
@@ -46,19 +73,18 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCityScreen(
-    onBack   : () -> Unit,
-    onConfirm: (CityEntity) -> Unit
+    onBack: () -> Unit, onConfirm: (CityEntity) -> Unit
 ) {
-    val context         = LocalContext.current
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val scope           = rememberCoroutineScope()
+    rememberCoroutineScope()
 
-    var searchQuery     by remember { mutableStateOf("") }
-    var isSearchActive  by remember { mutableStateOf(false) }
-    var suggestions     by remember { mutableStateOf(emptyList<PlaceSuggestion>()) }
-    var isSearching     by remember { mutableStateOf(false) }
-    var selectedPoint   by remember { mutableStateOf<GeoPoint?>(null) }
-    var selectedName    by remember { mutableStateOf<String?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
+    var suggestions by remember { mutableStateOf(emptyList<PlaceSuggestion>()) }
+    var isSearching by remember { mutableStateOf(false) }
+    var selectedPoint by remember { mutableStateOf<GeoPoint?>(null) }
+    var selectedName by remember { mutableStateOf<String?>(null) }
 
     remember(context) {
         Configuration.getInstance().apply {
@@ -83,8 +109,12 @@ fun AddCityScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(WeatherColors.SkyTop, WeatherColors.SkyMid,
-                        WeatherColors.SkyDeep, WeatherColors.SkyBottom)
+                    listOf(
+                        WeatherColors.SkyTop,
+                        WeatherColors.SkyMid,
+                        WeatherColors.SkyDeep,
+                        WeatherColors.SkyBottom
+                    )
                 )
             )
     ) {
@@ -94,18 +124,16 @@ fun AddCityScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            // ── Top bar ───────────────────────────────────────────────────────
             Row(
-                modifier          = Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // Fixed RTL spacing
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 IconButton(onClick = onBack) {
                     Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = null, // Fixed hardcoded
+                        Icons.Default.ArrowBack, contentDescription = null,
                         tint = WeatherColors.TextPrimary
                     )
                 }
@@ -117,37 +145,38 @@ fun AddCityScreen(
                 )
             }
 
-            // ── Search bar ────────────────────────────────────────────────────
             SearchBar(
-                query         = searchQuery,
+                query = searchQuery,
                 onQueryChange = { searchQuery = it },
-                onSearch      = { isSearchActive = false; keyboardController?.hide() },
-                active        = isSearchActive,
+                onSearch = { isSearchActive = false; keyboardController?.hide() },
+                active = isSearchActive,
                 onActiveChange = { isSearchActive = it },
-                placeholder   = {
+                placeholder = {
                     Text(
                         stringResource(R.string.add_city_search_hint),
                         color = WeatherColors.TextSecondary
                     )
                 },
-                leadingIcon   = {
+                leadingIcon = {
                     Icon(
                         Icons.Default.Search,
-                        contentDescription = stringResource(R.string.manage_cities_add), // Fixed content description
+                        contentDescription = stringResource(R.string.manage_cities_add),
                         tint = WeatherColors.TextSecondary
                     )
                 },
-                trailingIcon  = {
+                trailingIcon = {
                     if (isSearching) CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp), strokeWidth = 2.dp,
-                        color = WeatherColors.TextSecondary)
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = WeatherColors.TextSecondary
+                    )
                 },
                 colors = SearchBarDefaults.colors(
-                    containerColor       = WeatherColors.CardBgDark,
-                    inputFieldColors     = TextFieldDefaults.colors(
-                        focusedTextColor   = WeatherColors.TextPrimary,
+                    containerColor = WeatherColors.CardBgDark,
+                    inputFieldColors = TextFieldDefaults.colors(
+                        focusedTextColor = WeatherColors.TextPrimary,
                         unfocusedTextColor = WeatherColors.TextPrimary,
-                        cursorColor        = WeatherColors.TextPrimary
+                        cursorColor = WeatherColors.TextPrimary
                     )
                 ),
                 modifier = Modifier
@@ -158,24 +187,25 @@ fun AddCityScreen(
                     items(suggestions) { suggestion ->
                         ListItem(
                             headlineContent = {
-                                Text(suggestion.displayName, color = WeatherColors.TextPrimary,
-                                    fontSize = 14.sp)
+                                Text(
+                                    suggestion.displayName,
+                                    color = WeatherColors.TextPrimary,
+                                    fontSize = 14.sp
+                                )
                             },
                             colors = ListItemDefaults.colors(containerColor = WeatherColors.CardBgDark),
                             modifier = Modifier.clickable {
-                                searchQuery    = suggestion.displayName
-                                selectedName   = suggestion.displayName
-                                selectedPoint  = GeoPoint(suggestion.lat, suggestion.lon)
+                                searchQuery = suggestion.displayName
+                                selectedName = suggestion.displayName
+                                selectedPoint = GeoPoint(suggestion.lat, suggestion.lon)
                                 isSearchActive = false
                                 keyboardController?.hide()
-                            }
-                        )
+                            })
                         HorizontalDivider(color = WeatherColors.Divider, thickness = 0.5.dp)
                     }
                 }
             }
 
-            // ── Map ───────────────────────────────────────────────────────────
             AndroidView(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -190,12 +220,13 @@ fun AddCityScreen(
 
                         val tapReceiver = object : MapEventsReceiver {
                             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
-                                selectedPoint  = p
-                                selectedName   = null
+                                selectedPoint = p
+                                selectedName = null
                                 isSearchActive = false
                                 keyboardController?.hide()
                                 return true
                             }
+
                             override fun longPressHelper(p: GeoPoint) = false
                         }
                         overlays.add(MapEventsOverlay(tapReceiver))
@@ -207,17 +238,19 @@ fun AddCityScreen(
                         Marker(mapView).apply {
                             position = point
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                            // Use Locale.US for coordinates to ensure consistency in internal logic/display
-                            title = selectedName ?: String.format(Locale.getDefault(), "%.4f, %.4f", point.latitude, point.longitude)
+                            title = selectedName ?: String.format(
+                                Locale.getDefault(),
+                                "%.4f, %.4f",
+                                point.latitude,
+                                point.longitude
+                            )
                             mapView.overlays.add(this)
                             mapView.controller.animateTo(point)
                         }
                     }
                     mapView.invalidate()
-                }
-            )
+                })
 
-            // ── Bottom panel ──────────────────────────────────────────────────
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -227,36 +260,63 @@ fun AddCityScreen(
             ) {
                 if (selectedPoint != null) {
                     Text(
-                        text = selectedName ?: String.format(Locale.getDefault(), "%.4f°, %.4f°",
-                            selectedPoint!!.latitude, selectedPoint!!.longitude),
-                        color = WeatherColors.TextPrimary, fontSize = 16.sp,
+                        text = selectedName ?: String.format(
+                            Locale.getDefault(),
+                            "%.4f°, %.4f°",
+                            selectedPoint!!.latitude,
+                            selectedPoint!!.longitude
+                        ),
+                        color = WeatherColors.TextPrimary,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = String.format(Locale.getDefault(), "%.6f, %.6f", selectedPoint!!.latitude, selectedPoint!!.longitude),
-                        color = WeatherColors.TextSecondary, fontSize = 12.sp
+                        text = String.format(
+                            Locale.getDefault(),
+                            "%.6f, %.6f",
+                            selectedPoint!!.latitude,
+                            selectedPoint!!.longitude
+                        ), color = WeatherColors.TextSecondary, fontSize = 12.sp
                     )
                     Spacer(Modifier.height(12.dp))
                     Button(
                         onClick = {
-                            val pt   = selectedPoint ?: return@Button
-                            val name = selectedName
-                                ?: String.format(Locale.getDefault(), "%.4f, %.4f", pt.latitude, pt.longitude)
-                            onConfirm(CityEntity(name = name, lat = pt.latitude, lon = pt.longitude))
+                            val pt = selectedPoint ?: return@Button
+                            val name = selectedName ?: String.format(
+                                Locale.getDefault(),
+                                "%.4f, %.4f",
+                                pt.latitude,
+                                pt.longitude
+                            )
+                            onConfirm(
+                                CityEntity(
+                                    name = name,
+                                    lat = pt.latitude,
+                                    lon = pt.longitude
+                                )
+                            )
                         },
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
-                        shape    = RoundedCornerShape(14.dp),
-                        colors   = ButtonDefaults.buttonColors(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
                             containerColor = WeatherColors.TextPrimary.copy(alpha = 0.25f),
-                            contentColor   = WeatherColors.TextPrimary
+                            contentColor = WeatherColors.TextPrimary
                         )
                     ) {
-                        Text(stringResource(R.string.add_city_confirm),
-                            fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            stringResource(R.string.add_city_confirm),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 } else {
-                    Text(stringResource(R.string.add_city_hint),
-                        color = WeatherColors.TextSecondary, fontSize = 14.sp)
+                    Text(
+                        stringResource(R.string.add_city_hint),
+                        color = WeatherColors.TextSecondary,
+                        fontSize = 14.sp
+                    )
                 }
             }
         }
@@ -274,15 +334,15 @@ suspend fun fetchPlaceSuggestions(query: String): List<PlaceSuggestion> =
             val conn = url.openConnection() as HttpURLConnection
             conn.connectTimeout = 4000
             if (conn.responseCode == HttpURLConnection.HTTP_OK) {
-                val json     = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+                val json = JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
                 val features = json.getJSONArray("features")
                 for (i in 0 until features.length()) {
-                    val feat   = features.getJSONObject(i)
+                    val feat = features.getJSONObject(i)
                     val coords = feat.getJSONObject("geometry").getJSONArray("coordinates")
-                    val lon    = coords.getDouble(0)
-                    val lat    = coords.getDouble(1)
-                    val props  = feat.getJSONObject("properties")
-                    val name   = listOf(
+                    val lon = coords.getDouble(0)
+                    val lat = coords.getDouble(1)
+                    val props = feat.getJSONObject("properties")
+                    val name = listOf(
                         props.optString("name", ""),
                         props.optString("city", ""),
                         props.optString("country", "")
